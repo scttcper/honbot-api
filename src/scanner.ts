@@ -52,8 +52,10 @@ async function fetch(matchIds: string[], attempt = 0) {
     if (e.statusCode === 404 || e.statusCode === 500) {
       // TODO: abandon hope of these matches or something
     }
+    if (e.statusCode === 429) {
+      await sleep(1000);
+    }
     if (attempt < config.retries) {
-      await sleep(500);
       return fetch(matchIds, attempt + 1);
     }
   }
@@ -86,7 +88,7 @@ function parse(raw: any, attempted: string[]) {
   const failed: number[] = [];
   for (const m of attempted) {
     const match: any = {};
-    if (!matchSetups[m] || !matchInfo[m]) {
+    if (!matchSetups[m] || !matchInfo[m] || !matchSetups[m].length) {
       log(`failed ${m}`);
       failed.push(parseInt(m, 10));
       continue;
@@ -96,6 +98,10 @@ function parse(raw: any, attempted: string[]) {
     match.setup = matchSetups[m][0];
     match.date = moment.tz(info.mdt, 'YYYY-MM-DD HH:mm:ss', 'America/Detroit').toDate();
     match.length = parseInt(info.time_played, 10);
+    match.version = info.version;
+    match.map = info.map;
+    match.server_id = parseInt(info.server_id, 10);
+    match.c_state = parseInt(info.c_state, 10);
     const minutes = moment.duration(match.length, 'seconds').asMinutes();
     const players = matchPlayer[m] || [];
     match.players = players.map((n: IMatchPlayer) => {
@@ -126,18 +132,50 @@ function parse(raw: any, attempted: string[]) {
       player.secs_dead = parseInt(n.secs_dead, 10);
       player.cs = parseInt(n.teamcreepkills, 10) + parseInt(n.neutralcreepkills, 10);
       player.bdmg = parseInt(n.bdmg, 10);
+      player.razed = parseInt(n.razed, 10);
       player.denies = parseInt(n.denies, 10);
       player.exp_denied = parseInt(n.exp_denied, 10);
       player.consumables = parseInt(n.consumables, 10);
       player.wards = parseInt(n.wards, 10);
+      player.bloodlust = parseInt(n.bloodlust, 10);
+      player.doublekill = parseInt(n.doublekill, 10);
+      player.triplekill = parseInt(n.triplekill, 10);
+      player.quadkill = parseInt(n.quadkill, 10);
+      player.annihilation = parseInt(n.annihilation, 10);
+      player.ks3 = parseInt(n.ks3, 10);
+      player.ks4 = parseInt(n.ks4, 10);
+      player.ks5 = parseInt(n.ks5, 10);
+      player.ks6 = parseInt(n.ks6, 10);
+      player.ks7 = parseInt(n.ks7, 10);
+      player.ks8 = parseInt(n.ks8, 10);
+      player.ks9 = parseInt(n.ks9, 10);
+      player.ks10 = parseInt(n.ks10, 10);
+      player.ks15 = parseInt(n.ks15, 10);
+      player.smackdown = parseInt(n.smackdown, 10);
+      player.humiliation = parseInt(n.humiliation, 10);
+      player.nemesis = parseInt(n.nemesis, 10);
+      player.retribution = parseInt(n.retribution, 10);
+      player.used_token = parseInt(n.used_token, 10);
+      player.time_earning_exp = parseInt(n.time_earning_exp, 10);
+      player.teamcreepkills = parseInt(n.teamcreepkills, 10);
+      player.teamcreepdmg = parseInt(n.teamcreepdmg, 10);
+      player.teamcreepexp = parseInt(n.teamcreepexp, 10);
+      player.teamcreepgold = parseInt(n.teamcreepgold, 10);
+      player.neutralcreepkills = parseInt(n.neutralcreepkills, 10);
+      player.neutralcreepdmg = parseInt(n.neutralcreepdmg, 10);
+      player.neutralcreepexp = parseInt(n.neutralcreepexp, 10);
+      player.neutralcreepgold = parseInt(n.neutralcreepgold, 10);
+      player.actions = parseInt(n.actions, 10);
+      player.gold = parseInt(n.gold, 10);
+      player.exp = parseInt(n.exp, 10);
       if (!player.deaths || !player.kills) {
         player.kdr = player.kills;
       } else {
         player.kdr = _.round(player.kills / player.deaths, 3) || 0;
       }
-      player.gpm = _.round(parseInt(n.gold, 10) / minutes, 3) || 0;
-      player.xpm = _.round(parseInt(n.exp, 10) / minutes, 3) || 0;
-      player.apm = _.round(parseInt(n.actions, 10) / minutes, 3) || 0;
+      player.gpm = _.round(player.gold / minutes, 3) || 0;
+      player.xpm = _.round(player.exp / minutes, 3) || 0;
+      player.apm = _.round(player.actions / minutes, 3) || 0;
       return player;
     });
     matches.push(match);
@@ -150,7 +188,7 @@ async function scan(startingId: number) {
     log('startingId required');
     throw new Error('startingId required');
   }
-  const matchIds = _.range(startingId, startingId + 25).map(String);
+  const matchIds = _.range(startingId, startingId + BATCH_SIZE).map(String);
   // convert matchSetups to numbers
   let res;
   try {
@@ -160,9 +198,16 @@ async function scan(startingId: number) {
     log('Fetch Failed');
     return;
   }
+  if (!res || !res.length) {
+    log('no results');
+    await sleep(100000);
+    return;
+  }
   const [parsed, failed] = parse(res, matchIds);
-  if (failed.length === 25) {
+  if (failed.length === matchIds.length) {
+    log('25 FAILED');
     await sleep(600000);
+    return;
   }
   const db = await mongo;
   const inserted = await db.collection('matches').insertMany(parsed);
@@ -186,8 +231,10 @@ async function loop() {
   let newest = STARTING_MATCH_ID;
   while (newest <= 147902889) {
     newest = await findNewest();
-    const status = await scan(newest + 1);
-    await sleep(1000);
+    const status = await scan(newest + 1).catch((e) => {
+      log(e);
+    });
+    await sleep(200);
   }
 }
 loop().then();
