@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "noResolve": false,
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "build",
+    "types" : ["node", "mocha"]
+  },
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "include": [
+    "src/**/*"
+  ],
+  "compileOnSave": false
+}
