@@ -53,7 +53,7 @@ async function fetch(matchIds: string[], attempt = 0) {
       // TODO: abandon hope of these matches or something
     }
     if (attempt < config.retries) {
-      await sleep(100);
+      await sleep(500);
       return fetch(matchIds, attempt + 1);
     }
   }
@@ -86,9 +86,10 @@ function parse(raw: any, attempted: string[]) {
   const failed: number[] = [];
   for (const m of attempted) {
     const match: any = {};
-    if (!matchInfo[m]) {
-      log('failed', m);
-      failed.push(match);
+    if (!matchSetups[m] || !matchInfo[m]) {
+      log(`failed ${m}`);
+      failed.push(parseInt(m, 10));
+      continue;
     }
     const info: any = matchInfo[m][0];
     match.match_id = parseInt(m, 10);
@@ -102,7 +103,8 @@ function parse(raw: any, attempted: string[]) {
       player.account_id = parseInt(n.account_id, 10);
       player.match_id = parseInt(m, 10);
       player.nickname = n.nickname;
-      player.lowercaseNickname = n.nickname.toLowerCase();
+      // use toLower because for some reason null nicknames
+      player.lowercaseNickname = _.toLower(n.nickname);
       player.clan_id = parseInt(n.clan_id, 10);
       player.hero_id = parseInt(n.hero_id, 10);
       player.position = parseInt(n.position, 10);
@@ -128,19 +130,19 @@ function parse(raw: any, attempted: string[]) {
       player.exp_denied = parseInt(n.exp_denied, 10);
       player.consumables = parseInt(n.consumables, 10);
       player.wards = parseInt(n.wards, 10);
-      if (!player.deaths) {
+      if (!player.deaths || !player.kills) {
         player.kdr = player.kills;
       } else {
-        player.kdr = _.round(player.kills / player.deaths, 3);
+        player.kdr = _.round(player.kills / player.deaths, 3) || 0;
       }
-      player.gpm = _.round(parseInt(n.gold, 10) / minutes, 3);
-      player.xpm = _.round(parseInt(n.exp, 10) / minutes, 3);
-      player.apm = _.round(parseInt(n.actions, 10) / minutes, 3);
+      player.gpm = _.round(parseInt(n.gold, 10) / minutes, 3) || 0;
+      player.xpm = _.round(parseInt(n.exp, 10) / minutes, 3) || 0;
+      player.apm = _.round(parseInt(n.actions, 10) / minutes, 3) || 0;
       return player;
     });
     matches.push(match);
   }
-  return matches;
+  return [matches, failed];
 }
 
 async function scan(startingId: number) {
@@ -155,9 +157,13 @@ async function scan(startingId: number) {
     res = await fetch(matchIds);
   } catch (e) {
     // TODO: wait longer
+    log('Fetch Failed');
     return;
   }
-  const parsed = parse(res, matchIds);
+  const [parsed, failed] = parse(res, matchIds);
+  if (failed.length === 25) {
+    await sleep(600000);
+  }
   const db = await mongo;
   const inserted = await db.collection('matches').insertMany(parsed);
 }
@@ -173,15 +179,15 @@ async function findNewest() {
     return STARTING_MATCH_ID;
   }
   // TODO: check time. not too fresh
-  console.log(newest)
   return newest.match_id;
 }
 
-findNewest().then((id) => {
-  console.log(id);
-  return scan(id);
-});
-// log('start');
-// scan().then(() => {
-//   log('done');
-// });
+async function loop() {
+  let newest = STARTING_MATCH_ID;
+  while (newest <= 147902889) {
+    newest = await findNewest();
+    const status = await scan(newest + 1);
+    await sleep(1000);
+  }
+}
+loop().then();
