@@ -31,7 +31,7 @@
     "@types/lodash": "^4.14.47",
     "@types/mocha": "^2.2.36",
     "@types/moment": "^2.13.0",
-    "@types/mongodb": "^2.1.36",
+    "@types/mongodb": "^2.1.37",
     "@types/request-promise-native": "^1.0.2",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",

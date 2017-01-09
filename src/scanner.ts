@@ -15,8 +15,10 @@ const BATCH_SIZE = 25;
 const TOKEN = config.token;
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
-function sleep(duration) {
+function sleep(duration: number, reason: string) {
   return new Promise((resolve, reject) => {
+    const time = moment.duration(duration, 'milliseconds').humanize();
+    log(`Sleeping for ${time} because ${reason}`);
     setTimeout(() => { resolve(0); }, duration);
   });
 }
@@ -50,10 +52,11 @@ async function fetch(matchIds: string[], attempt = 0) {
       throw new Error('Misconfigured honbot api token');
     }
     if (e.statusCode === 404 || e.statusCode === 500) {
-      // TODO: abandon hope of these matches or something
+      // mark all as failed
+      return [[], [], []];
     }
     if (e.statusCode === 429) {
-      await sleep(1000);
+      await sleep(1000, '429 from api');
     }
     if (attempt < config.retries) {
       return fetch(matchIds, attempt + 1);
@@ -88,7 +91,7 @@ function parse(raw: any, attempted: string[]) {
   const failed: number[] = [];
   for (const m of attempted) {
     const match: any = {};
-    if (!matchSetups[m] || !matchInfo[m] || !matchSetups[m].length) {
+    if (!matchSetups[m] || !matchInfo[m] || !matchSetups[m].length || !matchPlayer[m] || !matchPlayer[m].length) {
       log(`failed ${m}`);
       failed.push(parseInt(m, 10));
       continue;
@@ -183,58 +186,117 @@ function parse(raw: any, attempted: string[]) {
   return [matches, failed];
 }
 
-async function scan(startingId: number) {
-  if (!startingId) {
-    log('startingId required');
-    throw new Error('startingId required');
-  }
-  const matchIds = _.range(startingId, startingId + BATCH_SIZE).map(String);
-  // convert matchSetups to numbers
-  let res;
-  try {
-    res = await fetch(matchIds);
-  } catch (e) {
-    // TODO: wait longer
-    log('Fetch Failed');
-    return;
-  }
-  if (!res || !res.length) {
-    log('no results');
-    await sleep(100000);
+async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
+  const res = await fetch(matchIds);
+  if ((!res || !res.length) && catchFail) {
+    await sleep(100000, 'no results from grab');
     return;
   }
   const [parsed, failed] = parse(res, matchIds);
-  if (failed.length === matchIds.length) {
+  if (failed.length === matchIds.length && catchFail) {
     log('25 FAILED');
-    await sleep(600000);
     return;
   }
   const db = await mongo;
-  const inserted = await db.collection('matches').insertMany(parsed);
+  if (parsed.length) {
+    const pids = parsed.map((n) => n.match_id);
+    log('Parsed', pids)
+    await db.collection('matches').remove({ match_id: {$in: pids }});
+    await db.collection('matches').insertMany(parsed);
+  }
+  if (failed.length) {
+    for (const f of failed) {
+      const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
+      await db.collection('matches').update({ match_id: f }, fail);
+    }
+  }
 }
 
 async function findNewest() {
   const db = await mongo;
-  const newest = await db.collection('matches').findOne({}, {
-    fields: { match_id: 1, _id: 0 },
+  return db.collection('matches').findOne({ failed : { $exists : false } }, {
     sort: { match_id: -1 },
   });
-  if (newest === null) {
-    log('Starting from STARTING_MATCH_ID');
-    return STARTING_MATCH_ID;
-  }
-  // TODO: check time. not too fresh
-  return newest.match_id;
 }
 
-async function loop() {
-  let newest = STARTING_MATCH_ID;
-  while (newest <= 147902889) {
-    newest = await findNewest();
-    const status = await scan(newest + 1).catch((e) => {
+// async function loop() {
+//   let newest = STARTING_MATCH_ID;
+//   while (newest <= 147908000) {
+//     newest = await findNewest() || STARTING_MATCH_ID;
+//     const matchIds = _.range(newest, newest + BATCH_SIZE).map(String);
+//     const status = await grabAndSave(matchIds).catch((e) => {
+//       log(e);
+//     });
+//     await sleep(300);
+//   }
+// }
+// loop().then();
+async function findNewMatches() {
+  let last = 0;
+  while (true) {
+    const newestMatch = await findNewest();
+    if (newestMatch.match_id === last) {
+      await sleep(1200000, 'made no forward progress');
+    }
+    if (newestMatch) {
+      log('Newest', newestMatch.match_id);
+      const minutes = moment().diff(moment(newestMatch.date), 'minutes');
+      log('Age', minutes);
+      if (minutes < 140) {
+        await sleep(60000, 'matches too recent');
+        continue;
+      }
+    }
+    const newest = newestMatch ? newestMatch.match_id : STARTING_MATCH_ID;
+    const matchIds = _.range(newest + 1, newest + BATCH_SIZE).map(String);
+    log('Finding new matches!');
+    const status = await grabAndSave(matchIds, true).catch((e) => {
       log(e);
     });
-    await sleep(200);
+    last = newestMatch.match_id;
   }
 }
-loop().then();
+
+async function findAllMissing() {
+  log('finding');
+  const db = await mongo;
+  let cur = 0;
+  while (true) {
+    const missing = await db.collection('matches').find({
+      match_id: {$gt: cur},
+      failed: true,
+      attempts: { $lt: 4 } },
+      { limit: 25, fields: { match_id: 1 },
+    }).toArray();
+    if (!missing.length) {
+      // wait 30 minutes
+      await sleep(1800000, 'no missing found, reset cursor');
+      cur = 0;
+      continue;
+    }
+    const missingIds = missing.map((n) => n.match_id);
+    log('Attempting old matches!');
+    const status = await grabAndSave(missingIds, false).catch((e) => {
+      log(e);
+    });
+    cur = missingIds[missingIds.length - 1];
+    await sleep(5000, 'findAllMissing sleeping');
+  }
+}
+
+async function fix() {
+  const db = await mongo;
+  while (true) {
+    const match = await db.collection('matches').findOne({ players: { $size: 0 }, failed: { $exists : false } });
+    if (!match) {
+      return;
+    }
+    log(match.match_id);
+    const fail = { $set: { match_id: match.match_id, failed: true }, $inc: { attempts: 1 } };
+    await db.collection('matches').remove({ match_id: match.match_id });
+    await db.collection('matches').update({ match_id: match.match_id }, fail, { upsert: true });
+  }
+}
+fix().then();
+findAllMissing();
+findNewMatches();

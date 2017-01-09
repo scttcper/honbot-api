@@ -49,11 +49,7 @@
     "@types/cookies" "*"
     "@types/node" "*"
 
-"@types/lodash@^4.14.37":
-  version "4.14.45"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.45.tgz#db20238f23fa195d6fb8f9ff7988e8651fc8c302"
-
-"@types/lodash@^4.14.47":
+"@types/lodash@^4.14.37", "@types/lodash@^4.14.47":
   version "4.14.47"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.47.tgz#4f780d1de593baae2171998b24b4282c5a1f8698"
 
@@ -83,9 +79,9 @@
   dependencies:
     moment "*"
 
-"@types/mongodb@^2.1.36":
-  version "2.1.36"
-  resolved "https://registry.yarnpkg.com/@types/mongodb/-/mongodb-2.1.36.tgz#20a2ff69131ba4dff96ffbd7b578c1d90b86616b"
+"@types/mongodb@^2.1.37":
+  version "2.1.37"
+  resolved "https://registry.yarnpkg.com/@types/mongodb/-/mongodb-2.1.37.tgz#7f5748582a742dfe9a56955c68fa2aa53ae216f3"
   dependencies:
     "@types/node" "*"
 
