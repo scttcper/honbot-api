@@ -6,14 +6,16 @@
       "exec_mode"   : "cluster",
       "instances"   : "3",
       "env": {
-        "NODE_ENV": "prod"
+        "NODE_ENV": "prod",
+        "DEBUG": "honbot*"
       }
     },
     {
       "name"       : "hb4scanner",
       "script"     : "build/src/scanner.js",
       "env": {
-        "NODE_ENV": "prod"
+        "NODE_ENV": "prod",
+        "DEBUG": "honbot*"
       }
     }
   ]

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "noImplicitAny": false,
     "noResolve": false,
     "target": "es6",
@@ -15,7 +15,8 @@
     "build"
   ],
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "config/**/*"
   ],
   "compileOnSave": false
 }
