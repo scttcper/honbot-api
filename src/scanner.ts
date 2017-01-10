@@ -235,7 +235,7 @@ async function findNewMatches() {
   let last = 0;
   while (true) {
     const newestMatch = await findNewest();
-    if (newestMatch.match_id === last) {
+    if (newestMatch && newestMatch.match_id === last) {
       await sleep(1200000, 'made no forward progress');
     }
     if (newestMatch) {
