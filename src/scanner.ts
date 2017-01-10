@@ -200,7 +200,7 @@ async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
   const db = await mongo;
   if (parsed.length) {
     const pids = parsed.map((n) => n.match_id);
-    log('Parsed', pids)
+    log(`Parsed ${pids.length}`);
     await db.collection('matches').remove({ match_id: {$in: pids }});
     await db.collection('matches').insertMany(parsed);
   }
@@ -254,6 +254,7 @@ async function findNewMatches() {
       log(e);
     });
     last = newestMatch.match_id;
+    await sleep(3000, 'findNewMatches sleep');
   }
 }
 
@@ -284,19 +285,5 @@ async function findAllMissing() {
   }
 }
 
-async function fix() {
-  const db = await mongo;
-  while (true) {
-    const match = await db.collection('matches').findOne({ players: { $size: 0 }, failed: { $exists : false } });
-    if (!match) {
-      return;
-    }
-    log(match.match_id);
-    const fail = { $set: { match_id: match.match_id, failed: true }, $inc: { attempts: 1 } };
-    await db.collection('matches').remove({ match_id: match.match_id });
-    await db.collection('matches').update({ match_id: match.match_id }, fail, { upsert: true });
-  }
-}
-fix().then();
 findAllMissing();
 findNewMatches();
