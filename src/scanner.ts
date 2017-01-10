@@ -253,7 +253,7 @@ async function findNewMatches() {
     const status = await grabAndSave(matchIds, true).catch((e) => {
       log(e);
     });
-    last = newestMatch.match_id;
+    last = newest;
     await sleep(3000, 'findNewMatches sleep');
   }
 }
