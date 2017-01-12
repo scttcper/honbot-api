@@ -193,7 +193,7 @@ function parse(raw: any, attempted: string[]) {
   return [matches, failed];
 }
 
-async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
+export async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
   const res = await fetch(matchIds);
   if ((!res || !res.length) && catchFail) {
     await sleep(100000, 'no results from grab');
@@ -214,30 +214,18 @@ async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
   if (failed.length) {
     for (const f of failed) {
       const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
-      await db.collection('matches').update({ match_id: f }, fail);
+      await db.collection('matches').update({ match_id: f }, fail, { upsert: true });
     }
   }
 }
 
-async function findNewest() {
+export async function findNewest() {
   const db = await mongo;
   return db.collection('matches').findOne({ failed : { $exists : false } }, {
     sort: { match_id: -1 },
   });
 }
 
-// async function loop() {
-//   let newest = STARTING_MATCH_ID;
-//   while (newest <= 147908000) {
-//     newest = await findNewest() || STARTING_MATCH_ID;
-//     const matchIds = _.range(newest, newest + BATCH_SIZE).map(String);
-//     const status = await grabAndSave(matchIds).catch((e) => {
-//       log(e);
-//     });
-//     await sleep(300);
-//   }
-// }
-// loop().then();
 async function findNewMatches() {
   let last = 0;
   while (true) {
@@ -292,5 +280,7 @@ async function findAllMissing() {
   }
 }
 
-findAllMissing();
-findNewMatches();
+if (!module.parent) {
+  findNewMatches();
+  findAllMissing();
+}
