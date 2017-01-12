@@ -7,7 +7,7 @@ async function loop() {
   const newest = await findNewest();
   let cur = 147503111;
   while (cur < newest.match_id) {
-    const current = db.collection('matches').findOne({match_id: cur});
+    const current = await db.collection('matches').findOne({match_id: cur});
     cur++;
     if (!current) {
       console.log(cur)
