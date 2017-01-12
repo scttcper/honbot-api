@@ -1,6 +1,7 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
+import Raven from 'raven';
 import * as request from 'request-promise-native';
 
 import config from '../config';
@@ -8,6 +9,12 @@ import mongo from './db';
 import { IMatches, IMatchInfo, IMatchPlayer, IMatchPlayerItems, IMatchSetup  } from './matches';
 
 const log = debug('honbot');
+
+if (process.env.NODE_ENV !== 'dev') {
+  const client = Raven
+    .config(config.dsn)
+    .install({ unhandledRejection: false });
+}
 
 const STARTING_MATCH_ID = 147503111;
 // const STARTING_MATCH_ID = 7503111;

@@ -1,4 +1,5 @@
 import * as debug from 'debug';
+import * as kcors from 'kcors';
 import * as Koa from 'koa';
 import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
@@ -23,14 +24,14 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(logger());
 }
 
+app.use(kcors());
 app.use((ctx, next) => {
   ctx.type = 'json';
   return next();
 });
 
 const router = new Router();
-router.get('/playermatches/season/:nickname', async function getPlayer(ctx, next) {
-  log(ctx.params);
+router.get('/season/:nickname', async function getPlayer(ctx, next) {
   const lower = ctx.params.nickname.toLowerCase();
   const query = {
     'players.lowercaseNickname': lower,
@@ -39,7 +40,7 @@ router.get('/playermatches/season/:nickname', async function getPlayer(ctx, next
     'setup.officl': 1,
   };
   const db = await mongo;
-  ctx.body = await db.collection('matches').find(query).toArray();
+  ctx.body = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
   return next();
 });
 
@@ -48,5 +49,5 @@ app.use(router.routes())
 
 if (!module.parent) {
   app.listen(config.port);
-  debug(`listening on port: ${config.port}`);
+  log(`listening on port: ${config.port}`);
 }

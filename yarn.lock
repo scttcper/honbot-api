@@ -36,6 +36,12 @@
   version "9.1.9"
   resolved "https://registry.yarnpkg.com/@types/highlight.js/-/highlight.js-9.1.9.tgz#ed6336955eaf233b75eb7923b9b1f373d045ef01"
 
+"@types/kcors@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@types/kcors/-/kcors-2.2.0.tgz#642a139c52d6b48f148f011fa0dae61f5cf58bc3"
+  dependencies:
+    "@types/koa" "*"
+
 "@types/koa-router@^7.0.21":
   version "7.0.21"
   resolved "https://registry.yarnpkg.com/@types/koa-router/-/koa-router-7.0.21.tgz#8d462a631181022472e6a9a690934bbaa9a3e7a5"
@@ -549,6 +555,10 @@ cookies@~0.6.1:
   dependencies:
     depd "~1.1.0"
     keygrip "~1.0.1"
+
+copy-to@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/copy-to/-/copy-to-2.0.1.tgz#2680fbb8068a48d08656b6098092bdafc906f4a5"
 
 core-js@^2.4.0:
   version "2.4.1"
@@ -1367,6 +1377,12 @@ jsprim@^1.2.2:
     extsprintf "1.0.2"
     json-schema "0.2.3"
     verror "1.3.6"
+
+kcors@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/kcors/-/kcors-1.3.1.tgz#9bb64dce54623918ac58dd637e5e961cae18d667"
+  dependencies:
+    copy-to "^2.0.1"
 
 keygrip@~1.0.1:
   version "1.0.1"
