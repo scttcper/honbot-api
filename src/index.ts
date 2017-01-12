@@ -4,7 +4,7 @@ import * as Koa from 'koa';
 import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
 import * as koaRaven from 'koa2-raven';
-import Raven from 'raven';
+import * as Raven from 'raven';
 
 import config from '../config';
 import mongo from './db';
