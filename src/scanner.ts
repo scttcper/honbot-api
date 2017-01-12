@@ -1,7 +1,7 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
-import Raven from 'raven';
+import * as Raven from 'raven';
 import * as request from 'request-promise-native';
 
 import config from '../config';
