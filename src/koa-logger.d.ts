@@ -1,4 +1,4 @@
-declare function koaLogger(opts?: any): Koa.Middleware;
+declare function koaLogger(opts?: any): any;
 
 declare namespace koaLogger { }
 export = koaLogger;
