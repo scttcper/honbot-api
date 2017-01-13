@@ -13,7 +13,6 @@
     "lint": "tslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@types/moment-timezone": "^0.2.34",
     "debug": "^2.6.0",
     "kcors": "^2.2.0",
     "koa": "2.0.0-alpha.7",
@@ -37,6 +36,7 @@
     "@types/lodash": "^4.14.50",
     "@types/mocha": "^2.2.37",
     "@types/moment": "^2.13.0",
+    "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.37",
     "@types/request-promise-native": "^1.0.2",
     "chai": "^3.5.0",
