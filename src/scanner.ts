@@ -6,12 +6,12 @@ import * as request from 'request-promise-native';
 
 import config from '../config';
 import mongo from './db';
-import { IMatches, IMatchInfo, IMatchPlayer, IMatchPlayerItems, IMatchSetup  } from './matches';
+import { IMatchPlayer  } from './matches';
 
 const log = debug('honbot');
 
 if (process.env.NODE_ENV !== 'dev') {
-  const client = Raven
+  Raven
     .config(config.dsn)
     .install({ unhandledRejection: false });
 }
@@ -245,9 +245,7 @@ async function findNewMatches() {
     const newest = newestMatch ? newestMatch.match_id : STARTING_MATCH_ID;
     const matchIds = _.range(newest + 1, newest + BATCH_SIZE).map(String);
     log('Finding new matches!');
-    const status = await grabAndSave(matchIds, true).catch((e) => {
-      log(e);
-    });
+    await grabAndSave(matchIds, true);
     last = newest;
     await sleep(3000, 'findNewMatches sleep');
   }
@@ -272,9 +270,7 @@ async function findAllMissing() {
     }
     const missingIds = missing.map((n) => n.match_id);
     log('Attempting old matches!');
-    const status = await grabAndSave(missingIds, false).catch((e) => {
-      log(e);
-    });
+    await grabAndSave(missingIds, false);
     cur = missingIds[missingIds.length - 1];
     await sleep(5000, 'findAllMissing sleeping');
   }
