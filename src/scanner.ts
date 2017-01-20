@@ -81,11 +81,11 @@ function parse(raw: any, attempted: string[]) {
     const r = {
       items: [],
       match_id: items.match_id,
-      account_id: items.account_id,
+      account_id: parseInt(items.account_id, 10),
     };
     ITEM_SLOTS.map((slot) => {
       if (items[slot]) {
-        r.items.push(items[slot]);
+        r.items.push(parseInt(items[slot], 10));
       }
     });
     return r;
@@ -124,7 +124,8 @@ function parse(raw: any, attempted: string[]) {
       player.clan_id = parseInt(n.clan_id, 10);
       player.hero_id = parseInt(n.hero_id, 10);
       player.position = parseInt(n.position, 10);
-      player.items = _.find(matchPlayerItems[m], _.matchesProperty('account_id', player.player_id)) || [];
+      const itemObj = _.find(matchPlayerItems[m], _.matchesProperty('account_id', player.account_id));
+      player.items = itemObj ? itemObj.items : [];
       player.team = parseInt(n.team, 10);
       player.level = parseInt(n.level, 10);
       player.win = n.wins === '1';
