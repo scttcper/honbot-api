@@ -53,6 +53,13 @@ router.get('/playerMatches/:nickname', async function getPlayer(ctx, next) {
   return next();
 });
 
+router.get('/match/:matchId', async function getPlayer(ctx, next) {
+  const query = { match_id: parseInt(ctx.params.matchId, 10) };
+  const db = await mongo;
+  ctx.body = await db.collection('matches').findOne(query);
+  return next();
+});
+
 app.use(router.routes())
   .use(router.allowedMethods());
 
