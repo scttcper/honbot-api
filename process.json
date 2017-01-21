@@ -1,7 +1,7 @@
 {
   "apps" : [
     {
-      "name"        : "hb4",
+      "name"        : "hb",
       "script"      : "build/src/index.js",
       "exec_mode"   : "cluster",
       "instances"   : "3",
@@ -11,7 +11,7 @@
       }
     },
     {
-      "name"       : "hb4scanner",
+      "name"       : "hbscan",
       "script"     : "build/src/scanner.js",
       "env": {
         "NODE_ENV": "prod",
