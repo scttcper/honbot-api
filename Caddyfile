@@ -1,8 +1,0 @@
-api.honbot.com {
-  gzip
-  log ../honaccess.log
-  proxy / localhost:5005 {
-		proxy_header Host {host}
-		proxy_header X-Forwarded-Proto {scheme}
-	}
-}
