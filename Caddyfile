@@ -1,0 +1,3 @@
+api.honbot.com
+gzip
+log ../honaccess.log
