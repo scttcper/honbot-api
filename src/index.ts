@@ -47,7 +47,10 @@ router.get('/season/:nickname', async function getPlayer(ctx, next) {
 
 router.get('/playerMatches/:nickname', async function getPlayer(ctx, next) {
   const lower = ctx.params.nickname.toLowerCase();
-  const query = { 'players.lowercaseNickname': lower };
+  const query = {
+    'failed': { $exists : false },
+    'players.lowercaseNickname': lower,
+  };
   const db = await mongo;
   ctx.body = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
   return next();
