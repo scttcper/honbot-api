@@ -13,7 +13,7 @@ const log = debug('honbot');
 if (process.env.NODE_ENV !== 'dev') {
   Raven
     .config(config.dsn)
-    .install({ unhandledRejection: false });
+    .install({ unhandledRejection: true });
 }
 
 const STARTING_MATCH_ID = 147503111;

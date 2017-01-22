@@ -16,7 +16,7 @@ app.proxy = true;
 if (process.env.NODE_ENV !== 'dev') {
   const client = Raven
     .config(config.dsn)
-    .install({ unhandledRejection: false });
+    .install({ unhandledRejection: true });
   koaRaven(app, client);
 }
 
@@ -54,9 +54,11 @@ router.get('/playerMatches/:nickname', async function getPlayer(ctx, next) {
 });
 
 router.get('/match/:matchId', async function getPlayer(ctx, next) {
-  const query = { match_id: parseInt(ctx.params.matchId, 10) };
+  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
   const db = await mongo;
-  ctx.body = await db.collection('matches').findOne(query);
+  const match = await db.collection('matches').findOne(query);
+  ctx.assert(match, 404);
+  ctx.body = match;
   return next();
 });
 
