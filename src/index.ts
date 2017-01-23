@@ -4,12 +4,15 @@ import * as Koa from 'koa';
 import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
 import * as koaRaven from 'koa2-raven';
+import * as _ from 'lodash';
 import * as Raven from 'raven';
+import { Rating, TrueSkill } from 'ts-trueskill';
 
 import config from '../config';
 import mongo from './db';
 
 const log = debug('honbot');
+const ts = new TrueSkill(null, null, null, null, 0);
 
 const app = module.exports = new Koa();
 app.proxy = true;
@@ -32,7 +35,7 @@ app.use((ctx, next) => {
 
 const router = new Router();
 
-router.get('/season/:nickname', async function getPlayer(ctx, next) {
+router.get('/season/:nickname', async(ctx, next) => {
   const lower = ctx.params.nickname.toLowerCase();
   const query = {
     'players.lowercaseNickname': lower,
@@ -45,7 +48,7 @@ router.get('/season/:nickname', async function getPlayer(ctx, next) {
   return next();
 });
 
-router.get('/playerMatches/:nickname', async function getPlayer(ctx, next) {
+router.get('/playerMatches/:nickname', async(ctx, next) => {
   const lower = ctx.params.nickname.toLowerCase();
   const query = {
     'failed': { $exists : false },
@@ -56,12 +59,38 @@ router.get('/playerMatches/:nickname', async function getPlayer(ctx, next) {
   return next();
 });
 
-router.get('/match/:matchId', async function getPlayer(ctx, next) {
+router.get('/match/:matchId', async(ctx, next) => {
   const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
   const db = await mongo;
   const match = await db.collection('matches').findOne(query);
   ctx.assert(match, 404);
   ctx.body = match;
+  return next();
+});
+
+router.get('/matchSkill/:matchId', async(ctx, next) => {
+  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
+  const db = await mongo;
+  const match = await db.collection('matches').findOne(query);
+  ctx.assert(match, 404);
+  const accountIds = match.players.map((n) => n.account_id);
+  const players = await db.collection('trueskill').find({ _id: { $in: accountIds }}).toArray();
+  const teams = [[], []];
+  for (const p of match.players) {
+    const cur = _.find(players, _.matchesProperty('_id', p.account_id));
+    const r = new Rating(cur.mu, cur.sigma);
+    teams[p.team - 1].push(r);
+  }
+  const quality = ts.quality(teams);
+  const sum = _.sumBy(players, 'mu');
+  const averageScore = sum / players.length;
+  const oddsTeam1Win = ts.winProbability(teams[0], teams[1]);
+  ctx.body = {
+    quality,
+    averageScore,
+    trueskill: players,
+    oddsTeam1Win,
+  };
   return next();
 });
 

@@ -7,6 +7,7 @@ import * as request from 'request-promise-native';
 import config from '../config';
 import mongo from './db';
 import { IMatchPlayer  } from './matches';
+import { calculatePlayerSkill } from './skill';
 
 const log = debug('honbot');
 
@@ -189,6 +190,9 @@ function parse(raw: any, attempted: string[]) {
       player.apm = _.round(player.actions / minutes, 3) || 0;
       return player;
     });
+    if (match.setup.nl + match.setup.officl === 2) {
+      calculatePlayerSkill(match.players, match.match_id);
+    }
     matches.push(match);
   }
   return [matches, failed];
@@ -248,7 +252,7 @@ async function findNewMatches() {
     log('Finding new matches!');
     await grabAndSave(matchIds, true);
     last = newest;
-    await sleep(500, 'findNewMatches sleep');
+    await sleep(1500, 'findNewMatches sleep');
   }
 }
 
