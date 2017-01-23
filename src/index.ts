@@ -99,6 +99,17 @@ router.get('/matchSkill/:matchId', async(ctx, next) => {
   return next();
 });
 
+router.get('/latestMatches', async(ctx, next) => {
+  const db = await mongo;
+  ctx.body = await db
+    .collection('matches')
+    .find({ failed: { $exists : false } })
+    .sort({ match_id: -1 })
+    .limit(25)
+    .toArray();
+  return next();
+});
+
 app.use(router.routes())
   .use(router.allowedMethods());
 
