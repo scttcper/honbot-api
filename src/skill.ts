@@ -44,7 +44,7 @@ export async function calculatePlayerSkill(players: any[], matchId: number) {
       },
       $inc: { games: 1 },
     };
-    db.collection('trueskill').updateOne({ _id: a }, save, { upsert: true });
+    await db.collection('trueskill').updateOne({ _id: a }, save, { upsert: true });
   }
 }
 
