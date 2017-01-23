@@ -69,7 +69,12 @@ router.get('/match/:matchId', async(ctx, next) => {
 });
 
 router.get('/matchSkill/:matchId', async(ctx, next) => {
-  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
+  const query = {
+    'match_id': parseInt(ctx.params.matchId, 10),
+    'failed': { $exists : false },
+    'setup.nl': 1,
+    'setup.officl': 1,
+  };
   const db = await mongo;
   const match = await db.collection('matches').findOne(query);
   ctx.assert(match, 404);
