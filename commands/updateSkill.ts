@@ -10,7 +10,7 @@ async function loop() {
   const newest = await findNewest();
   let cur = 147503111;
   const bar = new ProgressBar(':bar', { total: newest.match_id - cur, width: 100 });
-  while (cur < 147725599 + 1) {
+  while (cur < newest.match_id) {
     bar.tick();
     const current = await db.collection('matches').findOne({ match_id: cur });
     cur++;
