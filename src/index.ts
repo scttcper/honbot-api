@@ -35,7 +35,7 @@ app.use((ctx, next) => {
 
 const router = new Router();
 
-router.get('/season/:nickname', async(ctx, next) => {
+router.get('/season/:nickname', async (ctx, next) => {
   const lower = ctx.params.nickname.toLowerCase();
   const query = {
     'players.lowercaseNickname': lower,
@@ -48,7 +48,7 @@ router.get('/season/:nickname', async(ctx, next) => {
   return next();
 });
 
-router.get('/playerMatches/:nickname', async(ctx, next) => {
+router.get('/playerMatches/:nickname', async (ctx, next) => {
   const lower = ctx.params.nickname.toLowerCase();
   const query = {
     'failed': { $exists : false },
@@ -59,7 +59,7 @@ router.get('/playerMatches/:nickname', async(ctx, next) => {
   return next();
 });
 
-router.get('/match/:matchId', async(ctx, next) => {
+router.get('/match/:matchId', async (ctx, next) => {
   const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
   const db = await mongo;
   const match = await db.collection('matches').findOne(query);
@@ -68,7 +68,7 @@ router.get('/match/:matchId', async(ctx, next) => {
   return next();
 });
 
-router.get('/matchSkill/:matchId', async(ctx, next) => {
+router.get('/matchSkill/:matchId', async (ctx, next) => {
   const query = {
     'match_id': parseInt(ctx.params.matchId, 10),
     'failed': { $exists : false },
@@ -99,7 +99,7 @@ router.get('/matchSkill/:matchId', async(ctx, next) => {
   return next();
 });
 
-router.get('/latestMatches', async(ctx, next) => {
+router.get('/latestMatches', async (ctx, next) => {
   const db = await mongo;
   ctx.body = await db
     .collection('matches')

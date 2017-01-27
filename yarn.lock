@@ -42,6 +42,12 @@
   dependencies:
     "@types/koa" "*"
 
+"@types/koa-logger@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@types/koa-logger/-/koa-logger-2.0.2.tgz#15538a07c5fbfdecdb9c4c7b59de0d2f8be37bf2"
+  dependencies:
+    "@types/koa" "*"
+
 "@types/koa-router@^7.0.21":
   version "7.0.21"
   resolved "https://registry.yarnpkg.com/@types/koa-router/-/koa-router-7.0.21.tgz#8d462a631181022472e6a9a690934bbaa9a3e7a5"
