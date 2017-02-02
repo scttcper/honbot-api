@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "inlineSourceMap": true,
+    "declaration": false,
+    "sourceMap": true,
     "noImplicitAny": false,
-    "noResolve": false,
-    "target": "es6",
+    "target": "ES2016",
+    "lib": ["ES2016"],
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "build",
-    "types" : ["node", "mocha"]
+    "types" : ["mocha"]
   },
   "exclude": [
     "node_modules",

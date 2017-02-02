@@ -61,9 +61,13 @@
     "@types/cookies" "*"
     "@types/node" "*"
 
-"@types/lodash@^4.14.37", "@types/lodash@^4.14.50":
+"@types/lodash@^4.14.37":
   version "4.14.50"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.50.tgz#2227da4d65fafe249bccd59c7b9396e27674c8f7"
+
+"@types/lodash@^4.14.52":
+  version "4.14.52"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.52.tgz#de5c7ab14da1289733233c9b0ec6f9e377db90f5"
 
 "@types/marked@0.0.28":
   version "0.0.28"

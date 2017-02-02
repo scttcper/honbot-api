@@ -49,13 +49,28 @@ router.get('/season/:nickname', async (ctx, next) => {
 });
 
 router.get('/playerMatches/:nickname', async (ctx, next) => {
-  const lower = ctx.params.nickname.toLowerCase();
-  const query = {
-    'failed': { $exists : false },
-    'players.lowercaseNickname': lower,
-  };
+  const lowercaseNickname = ctx.params.nickname.toLowerCase();
+  const query = { 'players.lowercaseNickname': lowercaseNickname };
   const db = await mongo;
-  ctx.body = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
+  const matches = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
+  ctx.body = {};
+  ctx.body.wins = 0;
+  ctx.body.losses = 0;
+  ctx.body.matches = matches.map((m) => {
+    const n = _.find(m.players, _.matchesProperty('lowercaseNickname', lowercaseNickname));
+    ctx.body.wins += n.win ? 1 : 0;
+    ctx.body.losses += n.win ? 0 : 1;
+    n.server_id = m.server_id;
+    n.setup = m.setup;
+    n.date = m.date;
+    // n.fromNow = moment(m.date).fromNow();
+    n.length = m.length;
+    n.version = m.version;
+    n.c_state = m.c_state;
+    n.map = m.map;
+    // n.mode = getMode(m);
+    return n;
+  });
   return next();
 });
 
