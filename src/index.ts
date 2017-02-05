@@ -53,6 +53,7 @@ router.get('/playerMatches/:nickname', async (ctx, next) => {
   const query = { 'players.lowercaseNickname': lowercaseNickname };
   const db = await mongo;
   const matches = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
+  ctx.assert(matches && matches.length, 404);
   ctx.body = {};
   ctx.body.wins = 0;
   ctx.body.losses = 0;
