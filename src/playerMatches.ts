@@ -44,7 +44,7 @@ export default async function(lowercaseNickname: string) {
     // n.mode = getMode(m);
     return n;
   });
-  res.with = _.filter(w, (z: any) => z.t > 2).sort((z) => -z.t);
-  res.against = _.filter(a, (z: any) => z.t > 2).sort((z) => -z.t);
+  res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
+  res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   return res;
 }
