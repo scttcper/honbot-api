@@ -616,9 +616,9 @@ debug-log@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/debug-log/-/debug-log-1.0.1.tgz#2307632d4c04382b8df8a32f70b895046d52745f"
 
-debug@*, debug@^2.2.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.0.tgz#bc596bcabe7617f11d9fa15361eded5608b8499b"
+debug@*, debug@^2.2.0, debug@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
   dependencies:
     ms "0.7.2"
 
@@ -627,12 +627,6 @@ debug@2.2.0, debug@~2.2.0:
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.2.0.tgz#f87057e995b1a1f6ae6a4960664137bc56f039da"
   dependencies:
     ms "0.7.1"
-
-debug@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
-  dependencies:
-    ms "0.7.2"
 
 decamelize@^1.0.0, decamelize@^1.1.1:
   version "1.2.0"
@@ -1660,7 +1654,7 @@ marked@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
-mathjs@^3.8.1:
+mathjs@^3.9.1:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.9.1.tgz#f7b41760db4f421170eb72dd601be18161ca66e7"
   dependencies:
@@ -2559,13 +2553,13 @@ ts-node@^2.1.0:
     xtend "^4.0.0"
     yn "^1.2.0"
 
-ts-trueskill@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/ts-trueskill/-/ts-trueskill-1.0.8.tgz#9ba8f6c5d1d57ee7e35ea47522a993255edce5e3"
+ts-trueskill@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/ts-trueskill/-/ts-trueskill-1.0.10.tgz#64b6adaec59719f570a2d429f5c4c5bdeaf8f628"
   dependencies:
     gaussian "^1.1.0"
     lodash "^4.17.4"
-    mathjs "^3.8.1"
+    mathjs "^3.9.1"
     uuid "^3.0.1"
 
 tsconfig@^5.0.2:

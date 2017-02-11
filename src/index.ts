@@ -5,7 +5,6 @@ import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
 import * as koaRaven from 'koa2-raven';
 import * as _ from 'lodash';
-import * as moment from 'moment';
 import * as Raven from 'raven';
 import { Rating, TrueSkill } from 'ts-trueskill';
 

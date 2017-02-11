@@ -3,12 +3,13 @@
     "declaration": false,
     "sourceMap": true,
     "noImplicitAny": false,
-    "target": "ES2016",
-    "lib": ["ES2016"],
+    "target": "es2016",
+    "lib": ["es2017"],
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "build",
-    "types" : ["mocha"]
+    "types" : ["mocha"],
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
