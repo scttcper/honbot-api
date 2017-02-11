@@ -5,11 +5,13 @@ import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
 import * as koaRaven from 'koa2-raven';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import * as Raven from 'raven';
 import { Rating, TrueSkill } from 'ts-trueskill';
 
 import config from '../config';
 import mongo from './db';
+import playerMatches from './playerMatches';
 
 const log = debug('honbot');
 const ts = new TrueSkill(null, null, null, null, 0);
@@ -50,28 +52,8 @@ router.get('/season/:nickname', async (ctx, next) => {
 
 router.get('/playerMatches/:nickname', async (ctx, next) => {
   const lowercaseNickname = ctx.params.nickname.toLowerCase();
-  const query = { 'players.lowercaseNickname': lowercaseNickname };
-  const db = await mongo;
-  const matches = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
-  ctx.assert(matches && matches.length, 404);
-  ctx.body = {};
-  ctx.body.wins = 0;
-  ctx.body.losses = 0;
-  ctx.body.matches = matches.map((m) => {
-    const n = _.find(m.players, _.matchesProperty('lowercaseNickname', lowercaseNickname));
-    ctx.body.wins += n.win ? 1 : 0;
-    ctx.body.losses += n.win ? 0 : 1;
-    n.server_id = m.server_id;
-    n.setup = m.setup;
-    n.date = m.date;
-    // n.fromNow = moment(m.date).fromNow();
-    n.length = m.length;
-    n.version = m.version;
-    n.c_state = m.c_state;
-    n.map = m.map;
-    // n.mode = getMode(m);
-    return n;
-  });
+  ctx.body = await playerMatches(lowercaseNickname);
+  ctx.assert(ctx.body.matches && ctx.body.matches.length, 404);
   return next();
 });
 
@@ -124,6 +106,10 @@ router.get('/latestMatches', async (ctx, next) => {
     .limit(25)
     .toArray();
   return next();
+});
+
+router.get('/status', async (ctx, next) => {
+
 });
 
 app.use(router.routes())

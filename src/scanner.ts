@@ -6,7 +6,7 @@ import * as request from 'request-promise-native';
 
 import config from '../config';
 import mongo from './db';
-import { IMatchPlayer  } from './matches';
+import { IMatchPlayer } from './matches';
 import { calculatePlayerSkill } from './skill';
 
 const log = debug('honbot');
