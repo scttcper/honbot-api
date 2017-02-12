@@ -11,6 +11,7 @@ import { Rating, TrueSkill } from 'ts-trueskill';
 import config from '../config';
 import mongo from './db';
 import playerMatches from './playerMatches';
+import getTwitchStreams from './twitch';
 
 const log = debug('honbot');
 const ts = new TrueSkill(null, null, null, null, 0);
@@ -53,6 +54,11 @@ router.get('/playerMatches/:nickname', async (ctx, next) => {
   const lowercaseNickname = ctx.params.nickname.toLowerCase();
   ctx.body = await playerMatches(lowercaseNickname);
   ctx.assert(ctx.body.matches && ctx.body.matches.length, 404);
+  return next();
+});
+
+router.get('/twitchStreams', async (ctx, next) => {
+  ctx.body = await getTwitchStreams();
   return next();
 });
 

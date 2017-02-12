@@ -25,6 +25,7 @@
     "moment-timezone": "^0.5.11",
     "mongodb": "^2.2.22",
     "raven": "^1.1.2",
+    "redis": "^2.6.5",
     "request": "^2.79.0",
     "request-promise-native": "^1.0.3",
     "ts-trueskill": "^1.0.10"
@@ -41,6 +42,7 @@
     "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.40",
     "@types/progress": "^1.1.28",
+    "@types/redis": "^0.12.35",
     "@types/request-promise-native": "^1.0.2",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",

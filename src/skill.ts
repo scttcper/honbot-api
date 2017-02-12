@@ -47,12 +47,3 @@ export async function calculatePlayerSkill(players: any[], matchId: number) {
     await db.collection('trueskill').updateOne({ _id: a }, save, { upsert: true });
   }
 }
-
-// calculatePlayerSkill([
-//   {account_id: 1, win: 1, team: 1},
-//   {account_id: 2, win: 1, team: 1},
-//   {account_id: 3, win: 1, team: 1},
-//   {account_id: 4, win: 0, team: 2},
-//   {account_id: 5, win: 0, team: 2},
-//   {account_id: 6, win: 0, team: 2},
-// ]);

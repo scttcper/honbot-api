@@ -5,4 +5,5 @@ module.exports = {
   debug: false,
   retries: 2,
   dsn: false,
+  twitch: 'testclient',
 };

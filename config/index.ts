@@ -10,6 +10,7 @@ let config = {
   retries: 5,
   dsn: false,
   STARTING_MATCH_ID: 147503111,
+  twitch: '',
 };
 
 if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test') {
