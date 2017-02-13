@@ -81,6 +81,7 @@ router.get('/matchSkill/:matchId', async (ctx, next) => {
   const db = await mongo;
   const match = await db.collection('matches').findOne(query);
   ctx.assert(match, 404);
+  ctx.assert(match.players.length > 1, 404);
   const accountIds = match.players.map((n) => n.account_id);
   const players = await db.collection('trueskill').find({ _id: { $in: accountIds }}).toArray();
   const teams = [[], []];
@@ -89,6 +90,7 @@ router.get('/matchSkill/:matchId', async (ctx, next) => {
     const r = new Rating(cur.mu, cur.sigma);
     teams[p.team - 1].push(r);
   }
+  ctx.assert(teams[0].length && teams[1].length, 404);
   const quality = ts.quality(teams);
   const sum = _.sumBy(players, 'mu');
   const averageScore = sum / players.length;
