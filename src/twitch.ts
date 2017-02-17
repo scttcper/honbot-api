@@ -1,9 +1,7 @@
-import * as redis from 'redis';
 import * as request from 'request-promise-native';
 
 import config from '../config';
-
-const client = redis.createClient();
+import { client, getCache } from './redis';
 
 const options = {
   url: 'https://api.twitch.tv/kraken/streams',
@@ -12,19 +10,8 @@ const options = {
   json: true,
 };
 
-function getCache(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.get('twitch:cache', (err, res) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(res);
-    });
-  });
-}
-
 export default async function getTwitchStreams() {
-  const cache = await getCache();
+  const cache = await getCache('twitch:cache');
   if (cache) {
     return JSON.parse(cache);
   }
@@ -35,6 +22,6 @@ export default async function getTwitchStreams() {
     return [];
   }
   const sliced = res.streams.slice(0, 4);
-  client.setex('twitch:cache', 1200, JSON.stringify(sliced));
+  client.setex('twitch:cache', 1000, JSON.stringify(sliced));
   return sliced;
 }
