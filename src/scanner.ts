@@ -266,7 +266,7 @@ async function findAllMissing() {
       failed: true,
       attempts: { $lt: 4 } },
       { limit: 25, fields: { match_id: 1 },
-    }).toArray();
+    }).sort({ match_id: 1 }).toArray();
     if (!missing.length) {
       // wait 30 minutes
       await sleep(1800000, 'no missing found, reset cursor');
