@@ -219,16 +219,29 @@ export async function grabAndSave(matchIds: string[], catchFail: boolean = true)
   if (failed.length) {
     for (const f of failed) {
       const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
-      await db.collection('matches').update({ match_id: f }, fail, { upsert: true });
+      await db
+        .collection('matches')
+        .update({ match_id: f }, fail, { upsert: true });
     }
   }
 }
 
 export async function findNewest() {
   const db = await mongo;
-  return db.collection('matches').findOne({ failed : { $exists : false } }, {
+  return db
+    .collection('matches')
+    .findOne({ failed : { $exists : false } }, {
     sort: { match_id: -1 },
   });
+}
+
+export async function findOldest() {
+  const db = await mongo;
+  return db
+    .collection('matches')
+    .findOne({ failed : { $exists : false } }, {
+      sort: { match_id: 1 },
+    });
 }
 
 async function findNewMatches() {
@@ -282,6 +295,6 @@ async function findAllMissing() {
 }
 
 if (!module.parent) {
-  findNewMatches();
+  // findNewMatches();
   findAllMissing();
 }
