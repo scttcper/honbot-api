@@ -58,7 +58,7 @@ export async function matchSkill(match: any) {
     const r = new Rating(cur.mu, cur.sigma);
     teams[p.team - 1].push(r);
   }
-  if (teams[0].length || teams[1].length) {
+  if (!teams[0].length || !teams[1].length) {
     return;
   }
   const quality = ts.quality(teams);
