@@ -1483,9 +1483,9 @@ koa-router@^7.1.0:
     methods "^1.0.1"
     path-to-regexp "^1.1.1"
 
-koa2-raven@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/koa2-raven/-/koa2-raven-4.0.2.tgz#a350dc18f60526fdabc5707bedd8a05712e9b92f"
+koa2-raven@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/koa2-raven/-/koa2-raven-4.0.3.tgz#9bfa460bb623a30b5ad5d9c07a9609e0e475fe75"
   dependencies:
     statuses "^1.3.1"
 
@@ -1673,7 +1673,7 @@ marked@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
-mathjs@^3.9.1:
+mathjs@^3.9.3:
   version "3.9.3"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.9.3.tgz#d99b06093e83772a8d622457aedffd8f65a46183"
   dependencies:
@@ -2596,13 +2596,13 @@ ts-node@^2.1.0:
     xtend "^4.0.0"
     yn "^1.2.0"
 
-ts-trueskill@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/ts-trueskill/-/ts-trueskill-1.0.10.tgz#64b6adaec59719f570a2d429f5c4c5bdeaf8f628"
+ts-trueskill@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/ts-trueskill/-/ts-trueskill-1.0.12.tgz#5e4983deb8b1b59f5fa2206157b2af7a3bc00d63"
   dependencies:
     gaussian "^1.1.0"
     lodash "^4.17.4"
-    mathjs "^3.9.1"
+    mathjs "^3.9.3"
     uuid "^3.0.1"
 
 tsconfig@^5.0.2:
