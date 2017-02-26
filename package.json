@@ -17,7 +17,7 @@
     "debug": "^2.6.1",
     "kcors": "^2.2.0",
     "koa": "2.0.1",
-    "koa-logger": "^2.0.0",
+    "koa-logger": "^2.0.1",
     "koa-router": "^7.1.0",
     "koa2-raven": "^4.0.3",
     "lodash": "^4.17.4",
