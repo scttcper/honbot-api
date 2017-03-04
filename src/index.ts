@@ -80,7 +80,7 @@ router.get('/latestMatches', async (ctx, next) => {
     .collection('matches')
     .find({ failed: { $exists : false } })
     .sort({ match_id: -1 })
-    .limit(25)
+    .limit(10)
     .toArray();
   return next();
 });
