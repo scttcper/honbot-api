@@ -7,6 +7,9 @@
     "variable-name": false,
     "no-empty": false,
     "object-literal-sort-keys": false,
-    "no-unused-variable": true
+    "no-unused-variable": true,
+    "no-namespace": false,
+    "interface-name": false,
+    "callable-types": false
   }
 }
