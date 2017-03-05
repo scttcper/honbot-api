@@ -4,23 +4,28 @@ import mongo from '../src/db';
 import { findNewest } from '../src/scanner';
 import { calculatePlayerSkill } from '../src/skill';
 
+const PAGE_SIZE = 100;
+
 async function loop() {
   const db = await mongo;
   await db.collection('trueskill').remove({});
   const newest = await findNewest();
   let cur = 147503111;
-  const bar = new ProgressBar(':bar', { total: newest.match_id - cur, width: 100 });
+  const total = await db.collection('matches').count({ failed: { $exists : false } });
+  const bar = new ProgressBar(':bar', { total: total / PAGE_SIZE, width: 100 });
   while (cur < newest.match_id) {
     bar.tick();
-    const current = await db.collection('matches').findOne({ match_id: cur });
-    cur++;
-    if (!current || current.failed) {
-      continue;
+    const query = { match_id: { $gt: cur }, failed: { $exists : false } };
+    const matches = await db.collection('matches').find(query).sort({match_id: 1}).limit(PAGE_SIZE).toArray();
+    cur = matches[matches.length - 1].match_id;
+    const finished = [];
+    for (const match of matches) {
+      if (match.setup.nl + match.setup.officl !== 2) {
+        continue;
+      }
+      finished.push(calculatePlayerSkill(match.players, match.match_id));
     }
-    if (current.setup.nl + current.setup.officl !== 2) {
-      continue;
-    }
-    await calculatePlayerSkill(current.players, cur);
+    await Promise.all(finished);
   }
   // db.collection('trueskill').aggregate([
   //   { $match: { games: { $gte: 5 } } },

@@ -7,6 +7,7 @@ import * as request from 'request-promise-native';
 import config from '../config';
 import mongo from './db';
 import { IMatchPlayer } from './matches';
+import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
 
 const log = debug('honbot');
@@ -115,6 +116,8 @@ function parse(raw: any, attempted: string[]) {
     match.c_state = parseInt(info.c_state, 10);
     const minutes = moment.duration(match.length, 'seconds').asMinutes();
     const players = matchPlayer[m] || [];
+    match.mode = getMode(match);
+    match.type = getType(match.mode);
     match.players = players.map((n: IMatchPlayer) => {
       const player: any = {};
       player.account_id = parseInt(n.account_id, 10);

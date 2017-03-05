@@ -93,7 +93,7 @@ router.get('/stats', async (ctx, next) => {
   }
   const db = await mongo;
   ctx.body = {};
-  ctx.body.matches = await db.collection('matches').count({});
+  ctx.body.matches = await db.collection('matches').count({ failed: { $exists : false } });
   const lastDay = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
   ctx.body.lastDay = await db.collection('matches').count({ date: { $gt: lastDay } });
   const stats = await db.stats({ scale: 1024 * 1024 });
