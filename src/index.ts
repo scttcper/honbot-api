@@ -93,12 +93,50 @@ router.get('/stats', async (ctx, next) => {
   }
   const db = await mongo;
   ctx.body = {};
-  ctx.body.matches = await db.collection('matches').count({ failed: { $exists : false } });
+  ctx.body.matches = await db
+    .collection('matches')
+    .count({ failed: { $exists : false } });
   const lastDay = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
-  ctx.body.lastDay = await db.collection('matches').count({ date: { $gt: lastDay }, failed: { $exists : false } });
+  ctx.body.lastDay = await db
+    .collection('matches')
+    .count({ date: { $gt: lastDay }, failed: { $exists : false } });
   const stats = await db.stats({ scale: 1024 * 1024 });
   ctx.body.disksize = Math.round((stats.dataSize / 1024) * 100) / 100;
-  client.setex('stats:cache', 1000, JSON.stringify(ctx.body));
+  client.setex('stats:cache', 600, JSON.stringify(ctx.body));
+  return next();
+});
+
+router.get('/herostats', async (ctx, next) => {
+  const cache = await getCache('herostats:cache');
+  if (cache) {
+    ctx.body = JSON.parse(cache);
+    return next();
+  }
+  const db = await mongo;
+  const lastweek = moment().startOf('day').subtract(7, 'days').toDate();
+  const heroes = await db
+    .collection('heropicks')
+    .find({ date: { $gte: lastweek } }, { _id: 0 })
+    .sort({ date: -1 })
+    .toArray();
+  ctx.body = {};
+  const avg = {};
+  ctx.body.week = heroes.map((n) => {
+    if (!avg[n.hero_id]) {
+      avg[n.hero_id] = { hero_id: n.hero_id, win: 0, loss: 0 };
+    }
+    avg[n.hero_id].win += n.win;
+    avg[n.hero_id].loss += n.loss;
+    n.percent = Math.round((n.win / (n.loss + n.win) * 100)) / 100;
+    return n;
+  });
+  ctx.body.avg = Object.values(avg)
+    .map((n: any) => {
+      n.percent = Math.round((n.win / (n.loss + n.win) * 100)) / 100;
+      return n;
+    })
+    .sort((a, b) => b.percent - a.percent);
+  client.setex('herostats:cache', 1200, JSON.stringify(ctx.body));
   return next();
 });
 
