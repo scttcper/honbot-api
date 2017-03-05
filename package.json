@@ -27,7 +27,7 @@
     "redis": "^2.6.5",
     "request": "^2.80.0",
     "request-promise-native": "^1.0.3",
-    "ts-trueskill": "^1.0.12"
+    "ts-trueskill": "^1.0.13"
   },
   "devDependencies": {
     "@types/chai": "^3.4.35",
