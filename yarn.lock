@@ -104,12 +104,6 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/moment@^2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@types/moment/-/moment-2.13.0.tgz#604ebd189bc3bc34a1548689404e61a2a4aac896"
-  dependencies:
-    moment "*"
-
 "@types/mongodb@^2.1.41":
   version "2.1.41"
   resolved "https://registry.yarnpkg.com/@types/mongodb/-/mongodb-2.1.41.tgz#92ea0f832b9e0269c7826fb7f899cf86fe5c4df5"
@@ -268,10 +262,6 @@ async-each@^1.0.0:
 async@^1.4.0, async@^1.4.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
-
-async@~0.2.6:
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -995,7 +985,7 @@ glob-parent@^2.0.0:
   dependencies:
     is-glob "^2.0.0"
 
-glob@7.0.5:
+glob@7.0.5, glob@^7.0.5:
   version "7.0.5"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.0.5.tgz#b4202a69099bbb4d292a7c1b95b6682b67ebdc95"
   dependencies:
@@ -1006,7 +996,7 @@ glob@7.0.5:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@^7.0.0, glob@^7.0.5, glob@^7.0.6, glob@^7.1.1:
+glob@^7.0.0, glob@^7.0.6, glob@^7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.1.tgz#805211df04faaf1c63a3600306cdf5ade50b2ec8"
   dependencies:
@@ -1681,13 +1671,14 @@ marked@^0.3.5:
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
 mathjs@^3.9.3:
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.9.3.tgz#d99b06093e83772a8d622457aedffd8f65a46183"
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.10.0.tgz#cae0a27340483a00499253fb2c82f5818b9683fe"
   dependencies:
     complex.js "2.0.1"
     decimal.js "7.1.1"
     fraction.js "4.0.0"
-    tiny-emitter "1.1.0"
+    seed-random "2.2.0"
+    tiny-emitter "1.0.2"
     typed-function "0.10.5"
 
 md5-hex@^1.2.0:
@@ -1784,7 +1775,7 @@ moment-timezone@^0.5.11:
   dependencies:
     moment ">= 2.6.0"
 
-moment@*, "moment@>= 2.6.0", moment@>=2.14.0, moment@^2.17.1:
+"moment@>= 2.6.0", moment@>=2.14.0, moment@^2.17.1:
   version "2.17.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
 
@@ -2354,6 +2345,10 @@ safe-buffer@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
 
+seed-random@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/seed-random/-/seed-random-2.2.0.tgz#2a9b19e250a817099231a5b99a4daf80b7fbed54"
+
 semver-diff@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/semver-diff/-/semver-diff-2.1.0.tgz#4bbb8437c8d37e4b0cf1a68fd726ec6d645d6d36"
@@ -2594,9 +2589,9 @@ timed-out@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/timed-out/-/timed-out-4.0.1.tgz#f32eacac5a175bea25d7fab565ab3ed8741ef56f"
 
-tiny-emitter@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tiny-emitter/-/tiny-emitter-1.1.0.tgz#ab405a21ffed814a76c19739648093d70654fecb"
+tiny-emitter@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/tiny-emitter/-/tiny-emitter-1.0.2.tgz#8e49470d3f55f89e247210368a6bb9fb51aa1601"
 
 to-fast-properties@^1.0.1:
   version "1.0.2"
@@ -2668,8 +2663,8 @@ tslint@^4.5.1:
     update-notifier "^2.0.0"
 
 tsutils@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.1.0.tgz#94e0c267624eeb1b63561ba8ec0bcff71b4e2872"
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.2.1.tgz#74101a75dbf435800614ccafa4cd89a8d41ea03e"
 
 tunnel-agent@~0.4.1:
   version "0.4.3"
@@ -2733,10 +2728,9 @@ typescript@^2.2.1:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.2.1.tgz#4862b662b988a4c8ff691cc7969622d24db76ae9"
 
 uglify-js@^2.6:
-  version "2.8.5"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.5.tgz#ae9f5b143f4183d99a1dabb350e243fdc06641ed"
+  version "2.8.7"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.7.tgz#e0391911507b6d2e05697a528f1686e90a11b160"
   dependencies:
-    async "~0.2.6"
     source-map "~0.5.1"
     uglify-to-browserify "~1.0.0"
     yargs "~3.10.0"
@@ -2802,7 +2796,7 @@ util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
-uuid@3.0.0, uuid@^3.0.0:
+uuid@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.0.tgz#6728fc0459c450d796a99c31837569bdf672d728"
 
@@ -2810,7 +2804,7 @@ uuid@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
 
-uuid@^3.0.1:
+uuid@^3.0.0, uuid@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 

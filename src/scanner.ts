@@ -259,7 +259,7 @@ async function findNewMatches() {
     if (newestMatch) {
       log('Newest', newestMatch.match_id);
       const minutes = moment().diff(moment(newestMatch.date), 'minutes');
-      log('Age', minutes);
+      log(`Age: ${minutes}`);
       if (minutes < 140) {
         await sleep(60000, 'matches too recent');
         continue;
