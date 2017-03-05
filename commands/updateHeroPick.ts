@@ -1,16 +1,17 @@
 import * as ProgressBar from 'progress';
 
 import mongo from '../src/db';
-import { findNewest } from '../src/scanner';
-import { calculatePlayerSkill } from '../src/skill';
+import { heroPick } from '../src/heroPick';
+import { findNewest, findOldest } from '../src/scanner';
 
 const PAGE_SIZE = 100;
 
 async function loop() {
   const db = await mongo;
-  await db.collection('trueskill').remove({});
+  await db.collection('heropicks').remove({});
   const newest = await findNewest();
-  let cur = 147503111;
+  const oldest = await findOldest();
+  let cur = oldest.match_id;
   const total = await db.collection('matches').count({ failed: { $exists : false } });
   const bar = new ProgressBar(':bar', { total: total / PAGE_SIZE, width: 100 });
   let count = 0;
@@ -25,16 +26,10 @@ async function loop() {
         continue;
       }
       count++;
-      finished.push(calculatePlayerSkill(match));
+      finished.push(heroPick(match));
     }
     await Promise.all(finished);
   }
-  // db.collection('trueskill').aggregate([
-  //   { $match: { games: { $gte: 5 } } },
-  //   { $project: { mu: { $floor: '$mu' } } },
-  //   { $group : { _id : '$mu', count : { $sum : 1 } } },
-  //   { $sort: { _id: -1 } },
-  // ]);
   console.log(`Updated: ${count}`);
   db.close();
 }

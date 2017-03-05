@@ -5,7 +5,8 @@ import mongo from './db';
 
 const ts = new TrueSkill(null, null, null, null, 0);
 
-export async function calculatePlayerSkill(players: any[], matchId: number) {
+export async function calculatePlayerSkill(match: any) {
+  const players = match.players;
   const accountIds = players.map((n) => n.account_id);
   const db = await mongo;
   const query = { _id: { $in: accountIds }};

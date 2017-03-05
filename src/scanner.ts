@@ -6,6 +6,7 @@ import * as request from 'request-promise-native';
 
 import config from '../config';
 import mongo from './db';
+import { heroPick } from './heroPick';
 import { IMatchPlayer } from './matches';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
@@ -194,7 +195,8 @@ function parse(raw: any, attempted: string[]) {
       return player;
     });
     if (match.setup.nl + match.setup.officl === 2) {
-      calculatePlayerSkill(match.players, match.match_id);
+      calculatePlayerSkill(match);
+      heroPick(match);
     }
     matches.push(match);
   }
