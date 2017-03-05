@@ -41,6 +41,8 @@ export default async function(lowercaseNickname: string) {
     n.version = m.version;
     n.c_state = m.c_state;
     n.map = m.map;
+    n.type = m.type;
+    n.mode = m.mode;
     return n;
   });
   res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
