@@ -13,7 +13,6 @@
     "lint": "tslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@types/koa-logger": "^2.0.2",
     "debug": "^2.6.1",
     "kcors": "^2.2.0",
     "koa": "^2.0.1",
@@ -35,6 +34,7 @@
     "@types/debug": "^0.0.29",
     "@types/kcors": "^2.2.0",
     "@types/koa": "^2.0.38",
+    "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.21",
     "@types/lodash": "^4.14.54",
     "@types/mocha": "^2.2.39",
