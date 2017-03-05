@@ -16,7 +16,8 @@
   ],
   "include": [
     "src/**/*",
-    "config/**/*"
+    "config/**/*",
+    "commands/**/*"
   ],
   "compileOnSave": false
 }

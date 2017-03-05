@@ -34,6 +34,6 @@ async function loop() {
   //   { $sort: { _id: -1 } },
   // ]);
   db.close();
-  process.exit();
 }
-loop().then();
+
+loop().then(() => process.exit());
