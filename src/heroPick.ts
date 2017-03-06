@@ -7,6 +7,9 @@ export async function heroPick(match: any) {
   const date = moment(match.date).startOf('day').toDate();
   const updates = [];
   for (const p of match.players) {
+    if (p.hero_id === 0) {
+      continue;
+    }
     const query: any = {
       date,
       hero_id: p.hero_id,
