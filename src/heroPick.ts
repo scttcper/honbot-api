@@ -5,7 +5,6 @@ import mongo from './db';
 export async function heroPick(match: any) {
   const db = await mongo;
   const date = moment(match.date).startOf('day').toDate();
-  const updates = [];
   for (const p of match.players) {
     if (p.hero_id === 0) {
       continue;
@@ -20,8 +19,6 @@ export async function heroPick(match: any) {
     } else {
       update.$inc.loss = 1;
     }
-    const up = db.collection('heropicks').updateOne(query, update, { upsert: true });
-    updates.push(up);
+    await db.collection('heropicks').updateOne(query, update, { upsert: true });
   }
-  await Promise.all(updates);
 }

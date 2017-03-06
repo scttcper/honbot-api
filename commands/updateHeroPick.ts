@@ -18,17 +18,20 @@ async function loop() {
   while (cur < newest.match_id) {
     bar.tick();
     const query = { match_id: { $gt: cur }, failed: { $exists : false } };
-    const matches = await db.collection('matches').find(query).sort({match_id: 1}).limit(PAGE_SIZE).toArray();
+    const matches = await db
+      .collection('matches')
+      .find(query)
+      .sort({match_id: 1})
+      .limit(PAGE_SIZE)
+      .toArray();
     cur = matches[matches.length - 1].match_id;
-    const finished = [];
     for (const match of matches) {
       if (match.setup.nl + match.setup.officl !== 2) {
         continue;
       }
       count++;
-      finished.push(heroPick(match));
+      await heroPick(match);
     }
-    await Promise.all(finished);
   }
   console.log(`Updated: ${count}`);
   db.close();
