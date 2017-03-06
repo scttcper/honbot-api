@@ -113,10 +113,14 @@ router.get('/herostats', async (ctx, next) => {
     return next();
   }
   const db = await mongo;
-  const lastweek = moment().startOf('day').subtract(7, 'days').toDate();
+  const limit = moment().startOf('day').subtract(14, 'days').toDate();
+  const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
+  const matches = await db
+    .collection('matches')
+    .count({ date: { $gte: limit, $lte: yesterday } });
   const heroes = await db
     .collection('heropicks')
-    .find({ date: { $gte: lastweek } }, { _id: 0 })
+    .find({ date: { $gte: limit, $lte: yesterday } }, { _id: 0 })
     .sort({ date: -1 })
     .toArray();
   ctx.body = {};
@@ -140,6 +144,7 @@ router.get('/herostats', async (ctx, next) => {
   ctx.body.avg = Object.values(avg)
     .map((n: any) => {
       n.percent = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
+      n.pickRate = (n.win + n.loss) / matches;
       return n;
     })
     .sort((a, b) => b.percent - a.percent);

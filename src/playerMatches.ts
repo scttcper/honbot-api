@@ -13,10 +13,14 @@ function addCompetitor(obj, nickname, win) {
 }
 
 export default async function(lowercaseNickname: string) {
-  const query = { 'players.lowercaseNickname': lowercaseNickname };
   const lastWeek = moment().subtract(1, 'week').toDate();
   const db = await mongo;
-  const matches = await db.collection('matches').find(query).sort({ match_id: -1 }).toArray();
+  const matches = await db
+    .collection('matches')
+    .find({ 'players.lowercaseNickname': lowercaseNickname })
+    .hint({ 'players.lowercaseNickname': 1 })
+    .sort({ match_id: -1 })
+    .toArray();
   const res: any = {};
   const w: any = {};
   const a: any = {};
