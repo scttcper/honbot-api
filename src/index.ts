@@ -107,11 +107,11 @@ router.get('/stats', async (ctx, next) => {
 });
 
 router.get('/herostats', async (ctx, next) => {
-  // const cache = await getCache('herostats:cache');
-  // if (cache) {
-  //   ctx.body = JSON.parse(cache);
-  //   return next();
-  // }
+  const cache = await getCache('herostats:cache');
+  if (cache) {
+    ctx.body = JSON.parse(cache);
+    return next();
+  }
   const db = await mongo;
   const lastweek = moment().startOf('day').subtract(7, 'days').toDate();
   const heroes = await db
@@ -129,15 +129,17 @@ router.get('/herostats', async (ctx, next) => {
     if (!week[n.hero_id]) {
       week[n.hero_id] = [];
     }
-    avg[n.hero_id].win += n.win || 0;
-    avg[n.hero_id].loss += n.loss || 0;
+    n.win = n.win || 0;
+    n.loss = n.loss || 0;
+    avg[n.hero_id].win += n.win;
+    avg[n.hero_id].loss += n.loss;
     n.percent = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
     week[n.hero_id].push(n);
   });
   ctx.body.week = week;
   ctx.body.avg = Object.values(avg)
     .map((n: any) => {
-      n.percent = Math.round((n.win / (n.loss || 0 + n.win || 0) * 10000)) / 10000;
+      n.percent = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
       return n;
     })
     .sort((a, b) => b.percent - a.percent);
