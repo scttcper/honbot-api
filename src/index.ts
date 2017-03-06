@@ -117,7 +117,10 @@ router.get('/herostats', async (ctx, next) => {
   const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
   const matches = await db
     .collection('matches')
-    .count({ date: { $gte: limit, $lte: yesterday } });
+    .count({
+      date: { $gte: limit, $lte: yesterday },
+      type: {$in: ['ranked', 'season']},
+    });
   const heroes = await db
     .collection('heropicks')
     .find({ date: { $gte: limit, $lte: yesterday } }, { _id: 0 })
