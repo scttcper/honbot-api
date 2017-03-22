@@ -119,6 +119,7 @@ function parse(raw: any, attempted: string[]) {
     const players = matchPlayer[m] || [];
     match.mode = getMode(match);
     match.type = getType(match.mode);
+    match.failed = false;
     match.players = players.map((n: IMatchPlayer) => {
       const player: any = {};
       player.account_id = parseInt(n.account_id, 10);
@@ -235,7 +236,7 @@ export async function findNewest() {
   const db = await mongo;
   return db
     .collection('matches')
-    .findOne({ failed : { $exists : false } }, {
+    .findOne({ failed : false }, {
     sort: { match_id: -1 },
   });
 }
@@ -244,7 +245,7 @@ export async function findOldest() {
   const db = await mongo;
   return db
     .collection('matches')
-    .findOne({ failed : { $exists : false } }, {
+    .findOne({ failed : false }, {
       sort: { match_id: 1 },
     });
 }

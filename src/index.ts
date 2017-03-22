@@ -12,6 +12,7 @@ import mongo from './db';
 import playerMatches from './playerMatches';
 import { client, getCache } from './redis';
 import { matchSkill } from './skill';
+import stats from './stats';
 import getTwitchStreams from './twitch';
 
 const log = debug('honbot');
@@ -50,7 +51,7 @@ router.get('/twitchStreams', async (ctx, next) => {
 });
 
 router.get('/match/:matchId', async (ctx, next) => {
-  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: { $exists : false } };
+  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: false };
   const db = await mongo;
   const match = await db.collection('matches').findOne(query);
   ctx.assert(match, 404);
@@ -61,7 +62,7 @@ router.get('/match/:matchId', async (ctx, next) => {
 router.get('/matchSkill/:matchId', async (ctx, next) => {
   const query = {
     'match_id': parseInt(ctx.params.matchId, 10),
-    'failed': { $exists : false },
+    'failed': false,
     'setup.nl': 1,
     'setup.officl': 1,
   };
@@ -78,7 +79,7 @@ router.get('/latestMatches', async (ctx, next) => {
   const db = await mongo;
   ctx.body = await db
     .collection('matches')
-    .find({ failed: { $exists : false } })
+    .find({ failed: false })
     .sort({ match_id: -1 })
     .limit(10)
     .toArray();
@@ -86,23 +87,7 @@ router.get('/latestMatches', async (ctx, next) => {
 });
 
 router.get('/stats', async (ctx, next) => {
-  const cache = await getCache('stats:cache');
-  if (cache) {
-    ctx.body = JSON.parse(cache);
-    return next();
-  }
-  const db = await mongo;
-  ctx.body = {};
-  ctx.body.matches = await db
-    .collection('matches')
-    .count({ failed: { $exists : false } });
-  const lastDay = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
-  ctx.body.lastDay = await db
-    .collection('matches')
-    .count({ date: { $gt: lastDay }, failed: { $exists : false } });
-  const stats = await db.stats({ scale: 1024 * 1024 });
-  ctx.body.disksize = Math.round((stats.dataSize / 1024) * 100) / 100;
-  client.setex('stats:cache', 600, JSON.stringify(ctx.body));
+  ctx.body = await stats();
   return next();
 });
 

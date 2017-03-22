@@ -12,12 +12,12 @@ async function loop() {
   const newest = await findNewest();
   const oldest = await findOldest();
   let cur = oldest.match_id;
-  const total = await db.collection('matches').count({ failed: { $exists : false } });
+  const total = await db.collection('matches').count({ failed: false });
   const bar = new ProgressBar(':bar', { total: total / PAGE_SIZE, width: 100 });
   let count = 0;
   while (cur < newest.match_id) {
     bar.tick();
-    const query = { match_id: { $gt: cur }, failed: { $exists : false } };
+    const query = { match_id: { $gt: cur }, failed: false };
     const matches = await db
       .collection('matches')
       .find(query)
