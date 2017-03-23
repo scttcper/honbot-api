@@ -6,7 +6,7 @@ import * as request from 'request-promise-native';
 
 import config from '../config';
 import mongo from './db';
-import { heroPick } from './heroPick';
+import { heroPick } from './heroes';
 import { IMatchPlayer } from './matches';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
@@ -260,7 +260,8 @@ async function findNewMatches() {
     if (newestMatch) {
       log('Newest', newestMatch.match_id);
       const minutes = moment().diff(moment(newestMatch.date), 'minutes');
-      log(`Age: ${minutes}`);
+      const hours = minutes / 60;
+      log(`Age: ${hours} hours`);
       if (minutes < 140) {
         await sleep(60000, 'matches too recent');
         continue;
@@ -271,7 +272,7 @@ async function findNewMatches() {
     log('Finding new matches!');
     await grabAndSave(matchIds, true);
     last = newest;
-    await sleep(1500, 'findNewMatches sleep');
+    await sleep(800, 'findNewMatches sleep');
   }
 }
 

@@ -4,13 +4,12 @@ import * as Koa from 'koa';
 import * as logger from 'koa-logger';
 import * as Router from 'koa-router';
 import * as koaRaven from 'koa2-raven';
-import * as moment from 'moment';
 import * as Raven from 'raven';
 
 import config from '../config';
 import mongo from './db';
+import { heroStats } from './heroes';
 import playerMatches from './playerMatches';
-import { client, getCache } from './redis';
 import { matchSkill } from './skill';
 import stats from './stats';
 import getTwitchStreams from './twitch';
@@ -92,51 +91,7 @@ router.get('/stats', async (ctx, next) => {
 });
 
 router.get('/herostats', async (ctx, next) => {
-  const cache = await getCache('herostats:cache');
-  if (cache) {
-    ctx.body = JSON.parse(cache);
-    return next();
-  }
-  const db = await mongo;
-  const limit = moment().startOf('day').subtract(14, 'days').toDate();
-  const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
-  const matches = await db
-    .collection('matches')
-    .count({
-      date: { $gte: limit, $lte: yesterday },
-      type: {$in: ['ranked', 'season']},
-    });
-  const heroes = await db
-    .collection('heropicks')
-    .find({ date: { $gte: limit, $lte: yesterday } }, { _id: 0 })
-    .sort({ date: -1 })
-    .toArray();
-  ctx.body = {};
-  const avg = {};
-  const week = {};
-  heroes.map((n) => {
-    if (!avg[n.hero_id]) {
-      avg[n.hero_id] = { hero_id: n.hero_id, win: 0, loss: 0 };
-    }
-    if (!week[n.hero_id]) {
-      week[n.hero_id] = [];
-    }
-    n.win = n.win || 0;
-    n.loss = n.loss || 0;
-    avg[n.hero_id].win += n.win;
-    avg[n.hero_id].loss += n.loss;
-    n.percent = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
-    week[n.hero_id].push(n);
-  });
-  ctx.body.week = week;
-  ctx.body.avg = Object.values(avg)
-    .map((n: any) => {
-      n.percent = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
-      n.pickRate = (n.win + n.loss) / matches;
-      return n;
-    })
-    .sort((a, b) => b.percent - a.percent);
-  client.setex('herostats:cache', 1200, JSON.stringify(ctx.body));
+  ctx.body = await heroStats();
   return next();
 });
 

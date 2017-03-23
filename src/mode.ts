@@ -1,3 +1,6 @@
+/**
+ * Gets match mode from info of match
+ */
 export function getMode(match: any): string {
   if (match.map === 'midwars') {
     return 'Mid Wars';
@@ -20,6 +23,9 @@ export function getMode(match: any): string {
   return 'Unknown';
 }
 
+/**
+ * Gets match type from match mode
+ */
 export function getType(mode: string) {
   const m = mode.toLowerCase();
   if (m.includes('season')) {
