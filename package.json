@@ -7,6 +7,7 @@
     "build": "rimraf build; tsc -p .",
     "build:watch": "tsc -p . -w",
     "start": "NODE_ENV=dev DEBUG=honbot* nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "start-scanner": "NODE_ENV=dev DEBUG=honbot* nodemon --watch 'src/scanner.ts' --exec 'ts-node' src/scanner.ts",
     "test": "mocha --require ts-node/register test/*.spec.ts",
     "coverage": "nyc npm test",
     "lint": "tslint \"src/**/*.ts\""
@@ -35,7 +36,7 @@
     "@types/koa": "^2.0.39",
     "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.22",
-    "@types/lodash": "^4.14.56",
+    "@types/lodash": "^4.14.57",
     "@types/mocha": "^2.2.40",
     "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.41",
