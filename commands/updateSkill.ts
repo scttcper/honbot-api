@@ -1,7 +1,7 @@
 import * as ProgressBar from 'progress';
 
 import mongo from '../src/db';
-import { findNewest } from '../src/scanner';
+import { findNewest } from '../src/matches';
 import { calculatePlayerSkill } from '../src/skill';
 
 const PAGE_SIZE = 100;

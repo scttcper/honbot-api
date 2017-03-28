@@ -2,7 +2,7 @@ import * as ProgressBar from 'progress';
 
 import mongo from '../src/db';
 import { heroPick } from '../src/heroes';
-import { findNewest, findOldest } from '../src/scanner';
+import { findNewest, findOldest } from '../src/matches';
 
 const PAGE_SIZE = 100;
 

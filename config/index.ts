@@ -8,7 +8,7 @@ let config = {
   token: 'test',
   port: 5000,
   retries: 5,
-  dsn: false,
+  dsn: '',
   STARTING_MATCH_ID: 147503111,
   twitch: '',
 };

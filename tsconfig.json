@@ -7,8 +7,7 @@
     "lib": ["es2017"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "build",
-    "types" : ["mocha"]
+    "outDir": "build"
   },
   "exclude": [
     "node_modules",

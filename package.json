@@ -32,28 +32,31 @@
   "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/debug": "^0.0.29",
-    "@types/kcors": "^2.2.0",
+    "@types/kcors": "^2.2.1",
     "@types/koa": "^2.0.39",
     "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.22",
-    "@types/lodash": "^4.14.57",
+    "@types/lodash": "^4.14.58",
     "@types/mocha": "^2.2.40",
     "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.41",
     "@types/progress": "^1.1.28",
+    "@types/raven": "^1.2.0",
     "@types/redis": "^0.12.36",
     "@types/request-promise-native": "^1.0.2",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
-    "nyc": "^10.1.2",
+    "nyc": "^10.2.0",
     "progress": "^1.1.8",
     "rimraf": "^2.6.1",
     "ts-node": "^3.0.2",
     "tslint": "^4.5.1",
-    "typescript": "^2.2.1"
+    "typescript": "^2.2.2"
   },
   "repository": "https://github.com/scttcper/honbot-api.git",
-  "engines" : { "node" : ">=7.6.0" },
+  "engines": {
+    "node": ">=7.6.0"
+  },
   "license": "MIT"
 }

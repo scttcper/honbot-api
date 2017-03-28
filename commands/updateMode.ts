@@ -1,8 +1,8 @@
 import * as ProgressBar from 'progress';
 
 import mongo from '../src/db';
+import { findNewest, findOldest } from '../src/matches';
 import { getMode, getType } from '../src/mode';
-import { findNewest, findOldest } from '../src/scanner';
 
 const PAGE_SIZE = 100;
 const update_options = { writeConcern: 0 };

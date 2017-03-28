@@ -21,7 +21,7 @@ app.proxy = true;
 if (process.env.NODE_ENV !== 'dev') {
   const ravenClient = Raven
     .config(config.dsn)
-    .install({ unhandledRejection: true });
+    .install({ captureUnhandledRejections: true });
   koaRaven(app, ravenClient);
 }
 
