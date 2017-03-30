@@ -36,7 +36,7 @@
     "@types/koa": "^2.0.39",
     "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.22",
-    "@types/lodash": "^4.14.58",
+    "@types/lodash": "^4.14.60",
     "@types/mocha": "^2.2.40",
     "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.41",
@@ -51,7 +51,7 @@
     "progress": "^1.1.8",
     "rimraf": "^2.6.1",
     "ts-node": "^3.0.2",
-    "tslint": "^4.5.1",
+    "tslint": "^5.0.0",
     "typescript": "^2.2.2"
   },
   "repository": "https://github.com/scttcper/honbot-api.git",
