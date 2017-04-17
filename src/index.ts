@@ -74,6 +74,16 @@ router.get('/matchSkill/:matchId', async (ctx, next) => {
   return next();
 });
 
+router.get('/playerSkill/:accountId', async (ctx, next) => {
+  const accountId = parseInt(ctx.params.accountId, 10);
+  ctx.assert(accountId, 404);
+  const db = await mongo;
+  ctx.body = await db.collection('trueskill')
+    .findOne({ _id: accountId });
+  ctx.assert(ctx.body, 404);
+  return next();
+});
+
 router.get('/latestMatches', async (ctx, next) => {
   const db = await mongo;
   ctx.body = await db

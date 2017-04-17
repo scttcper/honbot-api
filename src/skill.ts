@@ -52,7 +52,9 @@ export async function calculatePlayerSkill(match: any) {
 export async function matchSkill(match: any) {
   const db = await mongo;
   const accountIds = match.players.map((n) => n.account_id);
-  const players = await db.collection('trueskill').find({ _id: { $in: accountIds }}).toArray();
+  const players = await db.collection('trueskill')
+    .find({ _id: { $in: accountIds }})
+    .toArray();
   const teams = [[], []];
   for (const p of match.players) {
     const cur = _.find(players, _.matchesProperty('_id', p.account_id));
