@@ -13,7 +13,7 @@
     "lint": "tslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "debug": "^2.6.3",
+    "debug": "^2.6.4",
     "kcors": "^2.2.0",
     "koa": "^2.2.0",
     "koa-logger": "^2.0.1",
@@ -22,7 +22,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
-    "mongodb": "^2.2.25",
+    "mongodb": "^2.2.26",
     "raven": "^1.2.1",
     "redis": "^2.7.1",
     "request": "^2.81.0",
@@ -30,14 +30,14 @@
     "ts-trueskill": "^1.0.15"
   },
   "devDependencies": {
-    "@types/chai": "^3.5.0",
+    "@types/chai": "^3.5.1",
     "@types/debug": "^0.0.29",
     "@types/kcors": "^2.2.1",
     "@types/koa": "^2.0.39",
     "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.22",
-    "@types/lodash": "^4.14.62",
-    "@types/mocha": "^2.2.40",
+    "@types/lodash": "^4.14.63",
+    "@types/mocha": "^2.2.41",
     "@types/moment-timezone": "^0.2.34",
     "@types/mongodb": "^2.1.43",
     "@types/progress": "^1.1.28",
