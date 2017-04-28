@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== 'dev') {
     .install({ captureUnhandledRejections: true });
 }
 
-const STARTING_MATCH_ID = 147503111;
+const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
 
 async function findNewMatches() {
@@ -72,5 +72,5 @@ async function findAllMissing() {
 
 if (!module.parent) {
   findNewMatches();
-  findAllMissing();
+  // findAllMissing();
 }

@@ -7,7 +7,7 @@ const log = debug('honbot');
 
 const db: Promise<Db> = new Promise((resolve, reject) => {
   log('Connecting to database');
-  resolve(MongoClient.connect(config.db));
+  // resolve(MongoClient.connect(config.db));
 });
 
 export default db;

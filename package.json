@@ -23,10 +23,12 @@
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "mongodb": "^2.2.26",
+    "pg": "^6.1.5",
     "raven": "^1.2.1",
     "redis": "^2.7.1",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.3",
+    "sequelize": "^3.30.4",
     "ts-trueskill": "^1.0.15"
   },
   "devDependencies": {
@@ -44,6 +46,7 @@
     "@types/raven": "^1.2.1",
     "@types/redis": "^0.12.36",
     "@types/request-promise-native": "^1.0.2",
+    "@types/sequelize": "^4.0.51",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",

@@ -4,12 +4,24 @@ const log = debug('honbot');
 log(`Env: ${process.env.NODE_ENV || 'test'}`);
 
 let config = {
-  db: 'mongodb://127.0.0.1/hontest',
+  username: '',
+  database: 'hon',
+  password: '',
+  db: {
+    host: 'localhost',
+    dialect: 'postgres',
+    pool: {
+      max: 5,
+      min: 0,
+      idle: 1000,
+    },
+  },
   token: 'test',
   port: 5000,
   retries: 5,
   dsn: '',
-  STARTING_MATCH_ID: 147503111,
+  // STARTING_MATCH_ID: 147503111,
+  STARTING_MATCH_ID: 149396730,
   twitch: '',
 };
 

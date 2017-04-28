@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
 import mongo from './db';
 
+import { Match } from '../models';
 import fetch from './fetch';
 import { heroPick } from './heroes';
 import { IMatchPlayer } from './interfaces';
@@ -13,24 +14,18 @@ import sleep from './sleep';
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
-export async function findNewest() {
-  const db = await mongo;
-  return db
-    .collection('matches')
-    .findOne(
-      { failed : false },
-      { sort: { match_id: -1 },
-    });
+export async function findNewest(): Promise<any> {
+  const match = await Match.findOne({
+    order: [['match_id', 'DESC']],
+  });
+  if (match) {
+    return match.toJSON();
+  }
+  return undefined;
 }
 
 export async function findOldest() {
-  const db = await mongo;
-  return db
-    .collection('matches')
-    .findOne(
-      { failed : false },
-      { sort: { match_id: 1 },
-    });
+  return Match.findOne();
 }
 
 function mapToNumber(obj) {
@@ -183,19 +178,20 @@ export async function grabAndSave(matchIds: string[], catchFail: boolean = true)
     log('25 failed, escaping');
     return;
   }
-  const db = await mongo;
   if (parsed.length) {
     const pids = parsed.map((n) => n.match_id);
     log(`Parsed ${pids.length}`);
-    await db.collection('matches').remove({ match_id: {$in: pids }});
-    await db.collection('matches').insertMany(parsed);
+    // TODO: remove failed
+    // await db.collection('matches').remove({ match_id: {$in: pids }});
+    await Match.bulkCreate(parsed);
   }
-  if (failed.length) {
-    for (const f of failed) {
-      const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
-      await db
-        .collection('matches')
-        .update({ match_id: f }, fail, { upsert: true });
-    }
-  }
+  // TODO
+  // if (failed.length) {
+  //   for (const f of failed) {
+  //     const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
+  //     await db
+  //       .collection('matches')
+  //       .update({ match_id: f }, fail, { upsert: true });
+  //   }
+  // }
 }
