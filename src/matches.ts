@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
 import mongo from './db';
 
-import { Match } from '../models';
+import { Matches, Players } from '../models';
 import fetch from './fetch';
 import { heroPick } from './heroes';
 import { IMatchPlayer } from './interfaces';
@@ -15,7 +15,7 @@ const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
 export async function findNewest(): Promise<any> {
-  const match = await Match.findOne({
+  const match = await Matches.findOne({
     order: [['match_id', 'DESC']],
   });
   if (match) {
@@ -25,7 +25,7 @@ export async function findNewest(): Promise<any> {
 }
 
 export async function findOldest() {
-  return Match.findOne();
+  return Matches.findOne();
 }
 
 function mapToNumber(obj) {
@@ -56,6 +56,17 @@ export function parseMultimatch(raw: any, attempted: string[]) {
     });
     return r;
   });
+  raw[0] = raw[0].map((n) => {
+    const x = {};
+    _.keys(n).map((k) => {
+      if (k === 'match_id') {
+        x[k] = n[k];
+        return;
+      }
+      x[`setup_${k}`] = n[k];
+    });
+    return x;
+  });
   const matchSetups = _.groupBy(raw[0], _.property('match_id'));
   const matchPlayerItems = _.groupBy(raw[1], _.property('match_id'));
   const matchPlayer = _.groupBy(raw[2], _.property('match_id'));
@@ -63,21 +74,19 @@ export function parseMultimatch(raw: any, attempted: string[]) {
   const matches = [];
   const failed: number[] = [];
   for (const m of attempted) {
-    const match: any = {};
     if (!matchSetups[m] || !matchInfo[m] || !matchSetups[m].length || !matchPlayer[m] || !matchPlayer[m].length) {
       log(`failed ${m}`);
       failed.push(parseInt(m, 10));
       continue;
     }
+    const match: any = { ...matchSetups[m][0] };
     const info: any = matchInfo[m][0];
-    match.match_id = parseInt(m, 10);
-    match.setup = matchSetups[m][0];
+    match.id = parseInt(m, 10);
     match.date = moment.tz(info.mdt, 'YYYY-MM-DD HH:mm:ss', 'America/Detroit').toDate();
     match.length = parseInt(info.time_played, 10);
     match.version = info.version;
     match.map = info.map;
     match.server_id = parseInt(info.server_id, 10);
-    match.c_state = parseInt(info.c_state, 10);
     const minutes = moment.duration(match.length, 'seconds').asMinutes();
     const players = matchPlayer[m] || [];
     match.mode = getMode(match);
@@ -86,7 +95,7 @@ export function parseMultimatch(raw: any, attempted: string[]) {
     match.players = players.map((n: IMatchPlayer) => {
       const player: any = {};
       player.account_id = parseInt(n.account_id, 10);
-      player.match_id = parseInt(m, 10);
+      player.matchId = parseInt(m, 10);
       player.nickname = n.nickname;
       // use toLower because for some reason null nicknames
       player.lowercaseNickname = _.toLower(n.nickname);
@@ -158,7 +167,7 @@ export function parseMultimatch(raw: any, attempted: string[]) {
       player.apm = _.round(player.actions / minutes, 3) || 0;
       return player;
     });
-    if (match.setup.nl + match.setup.officl === 2) {
+    if (match.setup_nl + match.setup_officl === 2) {
       calculatePlayerSkill(match);
       heroPick(match);
     }
@@ -183,7 +192,9 @@ export async function grabAndSave(matchIds: string[], catchFail: boolean = true)
     log(`Parsed ${pids.length}`);
     // TODO: remove failed
     // await db.collection('matches').remove({ match_id: {$in: pids }});
-    await Match.bulkCreate(parsed);
+    await Matches.bulkCreate(parsed).catch(() => _.noop());
+    console.log(_.flatten(parsed.map((n) => n.players)));
+    await Players.bulkCreate(_.flatten(parsed.map((n) => n.players)));
   }
   // TODO
   // if (failed.length) {

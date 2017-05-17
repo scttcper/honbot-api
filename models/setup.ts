@@ -1,4 +1,4 @@
-import { Match, PlayerMatches } from './index';
+import { Matches, Players } from './index';
 
-Match.sync({ force: true })
-  .then(() => PlayerMatches.sync());
+Matches.sync({ force: true })
+  .then(() => Players.sync({ force: true }));

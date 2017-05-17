@@ -10,17 +10,16 @@ const sequelize = new Sequelize(
 );
 
 export interface MatchAttributes {
-  match_id: number;
+  id: number;
   date: Date;
   length: number;
   version: string;
   map: string;
   server_id: number;
-  c_state: number;
   mode: string;
   type: string;
   failed: boolean;
-  players: PlayerMatchAttributes[];
+  players: PlayerAttributes[];
 
   setup_no_repick: number;
   setup_no_agi: number;
@@ -52,16 +51,15 @@ export interface MatchAttributes {
 }
 
 type MatchInstance = Sequelize.Instance<MatchAttributes>;
-export const Match = sequelize.define<MatchInstance, MatchAttributes>('match', {
-  match_id: { type: Sequelize.INTEGER, primaryKey: true },
+export const Matches = sequelize.define<MatchInstance, MatchAttributes>('matches', {
+  id: { type: Sequelize.INTEGER, primaryKey: true },
   date: { type: Sequelize.DATE },
-  length: { type: Sequelize.DATE },
-  version: { type: Sequelize.STRING },
-  map: { type: Sequelize.STRING },
+  length: { type: Sequelize.INTEGER },
+  version: { type: Sequelize.STRING(12) },
+  map: { type: Sequelize.STRING(25) },
   server_id: { type: Sequelize.INTEGER },
-  c_state: { type: Sequelize.INTEGER },
-  mode: { type: Sequelize.STRING },
-  type: { type: Sequelize.STRING },
+  mode: { type: Sequelize.STRING(25) },
+  type: { type: Sequelize.STRING(20) },
 
   setup_no_repick: { type: Sequelize.INTEGER },
   setup_no_agi: { type: Sequelize.INTEGER },
@@ -90,12 +88,13 @@ export const Match = sequelize.define<MatchInstance, MatchAttributes>('match', {
   setup_verified_only: { type: Sequelize.INTEGER },
   setup_gated: { type: Sequelize.INTEGER },
   setup_rapidfire: { type: Sequelize.INTEGER },
-},
-);
+}, {
+  updatedAt: false,
+});
 
-export interface PlayerMatchAttributes {
+export interface PlayerAttributes {
   account_id: number;
-  match_id: number;
+  matchId: number;
   nickname: string;
   lowercaseNickname: string;
   clan_id: number;
@@ -161,18 +160,18 @@ export interface PlayerMatchAttributes {
   apm: number;
 }
 
-type PlayerMatchInstance = Sequelize.Instance<PlayerMatchAttributes>;
-export const PlayerMatches = sequelize.define<PlayerMatchInstance, PlayerMatchAttributes>('playermatches', {
+type PlayersInstance = Sequelize.Instance<PlayerAttributes>;
+export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('players', {
     account_id: { type: Sequelize.INTEGER },
-    nickname: { type: Sequelize.INTEGER },
-    lowercaseNickname: { type: Sequelize.INTEGER },
+    nickname: { type: Sequelize.STRING(20) },
+    lowercaseNickname: { type: Sequelize.STRING(20) },
     clan_id: { type: Sequelize.INTEGER },
     hero_id: { type: Sequelize.INTEGER },
     position: { type: Sequelize.INTEGER },
-    items: { type: Sequelize.INTEGER },
+    items: { type: Sequelize.ARRAY(Sequelize.INTEGER) },
     team: { type: Sequelize.INTEGER },
     level: { type: Sequelize.INTEGER },
-    win: { type: Sequelize.INTEGER },
+    win: { type: Sequelize.BOOLEAN },
     concedes: { type: Sequelize.INTEGER },
     concedevotes: { type: Sequelize.INTEGER },
     buybacks: { type: Sequelize.INTEGER },
@@ -232,10 +231,11 @@ export const PlayerMatches = sequelize.define<PlayerMatchInstance, PlayerMatchAt
     timestamps: false,
     indexes: [
       // Create a unique index on email
-      { unique: true, fields: ['account_id', 'match_id'] },
+      { unique: true, fields: ['account_id', 'matchId'] },
       { fields: ['account_id'] },
     ],
   },
 );
 
-PlayerMatches.belongsTo(Match, { foreignKey: 'match_id' });
+Players.belongsTo(Matches);
+Matches.hasMany(Players);
