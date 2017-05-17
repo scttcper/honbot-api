@@ -6,6 +6,6 @@ services:
   - mongodb
   - redis-server
 script:
-  - yarn coverage
+  - npm run coverage
 after_success:
   - bash <(curl -s https://codecov.io/bash)
