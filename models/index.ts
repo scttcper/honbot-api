@@ -236,6 +236,9 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
   },
 );
 
+Players.belongsTo(Matches);
+Matches.hasMany(Players);
+
 export interface TrueskillAttributes {
   account_id?: number;
   mu?: number;
@@ -275,5 +278,18 @@ export const Heropick = sequelize.define<HeropickInstance, HeropickAttributes>('
   },
 );
 
-Players.belongsTo(Matches);
-Matches.hasMany(Players);
+export interface FailedAttributes {
+  id?: number;
+  attempts?: number;
+}
+
+type FailedInstance = Sequelize.Instance<FailedAttributes>;
+export const Failed = sequelize.define<FailedInstance, FailedAttributes>('fails', {
+    id: { type: Sequelize.INTEGER, primaryKey: true },
+    attempts: { type: Sequelize.INTEGER },
+  }, {
+    indexes: [
+      { fields: ['attempts'] },
+    ],
+  },
+);

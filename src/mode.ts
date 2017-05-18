@@ -12,6 +12,9 @@ export function getMode(match: any): string {
     return 'Capture the Flag';
   } else if (match.setup_alt_pick + match.setup_nl + match.setup_officl === 3) {
     // seasons
+    if (match.version > '4.1.0.0') {
+      return 'Season 3';
+    }
     if (match.version > '4.0.1.4') {
       return 'Season 2';
     }

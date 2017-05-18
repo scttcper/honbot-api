@@ -3,7 +3,6 @@ import * as Sequelize from 'sequelize';
 import { Rating, TrueSkill } from 'ts-trueskill';
 
 import { PlayerAttributes, Trueskill, TrueskillAttributes } from '../models';
-import mongo from './db';
 
 const ts = new TrueSkill(null, null, null, null, 0);
 
@@ -43,20 +42,18 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
       sigma: flattenedResults[key].sigma,
       games: Sequelize.literal('games + 1'),
     };
-    console.log('TRUESKILL')
     await Trueskill.update(q, { where: { account_id: teamIds[key] } });
   });
 }
 
-export async function matchSkill(match: any) {
-  const db = await mongo;
-  const accountIds = match.players.map((n) => n.account_id);
-  const players = await db.collection('trueskill')
-    .find({ _id: { $in: accountIds }})
-    .toArray();
+export async function matchSkill(players: PlayerAttributes[]) {
+  const accountIds = players.map((n) => n.account_id);
+  const pls = await Trueskill
+    .findAll({ where: { account_id: { $in: accountIds } } })
+    .then((n) => n.map((x) => x.toJSON()));
   const teams = [[], []];
-  for (const p of match.players) {
-    const cur = _.find(players, _.matchesProperty('_id', p.account_id));
+  for (const p of players) {
+    const cur: TrueskillAttributes = _.find(pls, _.matchesProperty('account_id', p.account_id));
     const r = new Rating(cur.mu, cur.sigma);
     teams[p.team - 1].push(r);
   }
@@ -64,13 +61,13 @@ export async function matchSkill(match: any) {
     return;
   }
   const quality = ts.quality(teams);
-  const sum = _.sumBy(players, 'mu');
-  const averageScore = sum / players.length;
+  const sum = _.sumBy(pls, 'mu');
+  const averageScore = sum / pls.length;
   const oddsTeam1Win = ts.winProbability(teams[0], teams[1]);
   return {
     quality,
     averageScore,
-    trueskill: players,
+    trueskill: pls,
     oddsTeam1Win,
   };
 }

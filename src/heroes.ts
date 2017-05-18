@@ -1,14 +1,12 @@
 import * as moment from 'moment';
 
 import { Heropick, PlayerAttributes } from '../models';
-import mongo from './db';
 import { client, getCache } from './redis';
 
 /**
  * Uses match date to update pick w/l for hero_id
  */
 export async function heroPick(players: PlayerAttributes[], day: Date) {
-  const db = await mongo;
   const date = moment(day).startOf('day').toDate();
   const promises = [];
   for (const p of players) {
@@ -31,7 +29,7 @@ export async function heroStats() {
   if (cache) {
     return JSON.parse(cache);
   }
-  const db = await mongo;
+  const db: any = {};
   const limit = moment().startOf('day').subtract(14, 'days').toDate();
   const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
   const m = db

@@ -7,11 +7,11 @@ import * as koaRaven from 'koa2-raven';
 import * as Raven from 'raven';
 
 import config from '../config';
-import mongo from './db';
+import { Players, Matches } from '../models';
 import { heroStats } from './heroes';
 import playerMatches from './playerMatches';
 import { matchSkill } from './skill';
-import stats from './stats';
+// import stats from './stats';
 import getTwitchStreams from './twitch';
 
 const log = debug('honbot');
@@ -50,65 +50,70 @@ router.get('/twitchStreams', async (ctx, next) => {
 });
 
 router.get('/match/:matchId', async (ctx, next) => {
-  const query = { match_id: parseInt(ctx.params.matchId, 10), failed: false };
-  const db = await mongo;
-  const match = await db.collection('matches').findOne(query);
+  const match = await Matches
+    .findById(
+      parseInt(ctx.params.matchId, 10),
+      { include: [{ model: Players }] },
+    );
   ctx.assert(match, 404);
-  ctx.body = match;
+  ctx.body = match.toJSON();
   return next();
 });
 
 router.get('/matchSkill/:matchId', async (ctx, next) => {
   const query = {
-    'match_id': parseInt(ctx.params.matchId, 10),
-    'failed': false,
-    'setup.nl': 1,
-    'setup.officl': 1,
+    id: parseInt(ctx.params.matchId, 10),
+    setup_nl: 1,
+    setup_officl: 1,
   };
-  const db = await mongo;
-  const match = await db.collection('matches').findOne(query);
+  const match = await Matches
+    .findOne({
+      where: query,
+      include: [{ model: Players }],
+    });
   ctx.assert(match, 404);
-  ctx.assert(match.players.length > 1, 404);
-  ctx.body = await matchSkill(match);
+  const players = match.toJSON().players;
+  ctx.assert(players.length > 1, 404);
+  ctx.body = await matchSkill(players);
   ctx.assert(ctx.body, 404);
   return next();
 });
 
-router.get('/playerSkill/:accountId', async (ctx, next) => {
-  const accountId = parseInt(ctx.params.accountId, 10);
-  ctx.assert(accountId, 404);
-  const db = await mongo;
-  ctx.body = await db.collection('trueskill')
-    .findOne({ _id: accountId });
-  ctx.assert(ctx.body, 404);
-  return next();
-});
+// router.get('/playerSkill/:accountId', async (ctx, next) => {
+//   const accountId = parseInt(ctx.params.accountId, 10);
+//   ctx.assert(accountId, 404);
+//   const db = await mongo;
+//   ctx.body = await db.collection('trueskill')
+//     .findOne({ _id: accountId });
+//   ctx.assert(ctx.body, 404);
+//   return next();
+// });
+//
+// router.get('/latestMatches', async (ctx, next) => {
+//   const db = await mongo;
+//   ctx.body = await db
+//     .collection('matches')
+//     .find({ failed: false })
+//     .sort({ match_id: -1 })
+//     .limit(10)
+//     .toArray();
+//   return next();
+// });
 
-router.get('/latestMatches', async (ctx, next) => {
-  const db = await mongo;
-  ctx.body = await db
-    .collection('matches')
-    .find({ failed: false })
-    .sort({ match_id: -1 })
-    .limit(10)
-    .toArray();
-  return next();
-});
-
-router.get('/stats', async (ctx, next) => {
-  ctx.body = await stats();
-  return next();
-});
-
-router.get('/herostats', async (ctx, next) => {
-  ctx.body = await heroStats();
-  return next();
-});
+// router.get('/stats', async (ctx, next) => {
+//   ctx.body = await stats();
+//   return next();
+// });
+//
+// router.get('/herostats', async (ctx, next) => {
+//   ctx.body = await heroStats();
+//   return next();
+// });
 
 app.use(router.routes())
   .use(router.allowedMethods());
 
 if (!module.parent) {
   app.listen(config.port);
-  log(`listening on port: ${config.port}`);
+  log(`http://localhost:${config.port}`);
 }

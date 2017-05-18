@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import * as Sequelize from 'sequelize';
 import { Rating, TrueSkill } from 'ts-trueskill';
+import { Db, MongoClient } from 'mongodb';
 
 import { Heropick, Matches, PlayerAttributes, Players, Trueskill, TrueskillAttributes } from '../models';
 import mongo from '../src/db';
@@ -10,7 +11,7 @@ import { calculatePlayerSkill } from '../src/skill';
 const ts = new TrueSkill(null, null, null, null, 0);
 
 async function loop() {
-  const db = await mongo;
+  const db = await MongoClient.connect('mongodb://127.0.0.1/hon');
   const oldest = await db.collection('matches').findOne(
     { failed: false },
     {
