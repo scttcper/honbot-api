@@ -38,7 +38,7 @@ function mapToNumber(obj) {
   });
 }
 
-export function parseMultimatch(raw: any, attempted: string[]) {
+export async function parseMultimatch(raw: any, attempted: string[]) {
   raw[0] = raw[0].map((setup) => {
     return mapToNumber(setup);
   });
@@ -168,8 +168,10 @@ export function parseMultimatch(raw: any, attempted: string[]) {
       return player;
     });
     if (match.setup_nl + match.setup_officl === 2) {
-      calculatePlayerSkill(match);
-      heroPick(match);
+      await Promise.all([
+        calculatePlayerSkill(match.players),
+        heroPick(match.players, match.date),
+      ]);
     }
     matches.push(match);
   }
@@ -182,7 +184,7 @@ export async function grabAndSave(matchIds: string[], catchFail: boolean = true)
     await sleep(100000, 'no results from grab');
     return;
   }
-  const [parsed, failed] = parseMultimatch(res, matchIds);
+  const [parsed, failed] = await parseMultimatch(res, matchIds);
   if (failed.length === matchIds.length && catchFail) {
     log('25 failed, escaping');
     return;

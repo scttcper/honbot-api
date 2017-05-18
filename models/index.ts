@@ -177,7 +177,7 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
     buybacks: { type: Sequelize.INTEGER },
     discos: { type: Sequelize.INTEGER },
     kicked: { type: Sequelize.INTEGER },
-    mmr_change: { type: Sequelize.DOUBLE },
+    mmr_change: { type: Sequelize.DECIMAL },
     herodmg: { type: Sequelize.INTEGER },
     kills: { type: Sequelize.INTEGER },
     assists: { type: Sequelize.INTEGER },
@@ -222,17 +222,55 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
     actions: { type: Sequelize.INTEGER },
     gold: { type: Sequelize.INTEGER },
     exp: { type: Sequelize.INTEGER },
-    kdr: { type: Sequelize.DOUBLE },
-    gpm: { type: Sequelize.DOUBLE },
-    xpm: { type: Sequelize.DOUBLE },
-    apm: { type: Sequelize.DOUBLE },
+    kdr: { type: Sequelize.DECIMAL },
+    gpm: { type: Sequelize.DECIMAL },
+    xpm: { type: Sequelize.DECIMAL },
+    apm: { type: Sequelize.DECIMAL },
   }, {
-    // don't add the timestamp attributes (updatedAt, createdAt)
     timestamps: false,
     indexes: [
-      // Create a unique index on email
       { unique: true, fields: ['account_id', 'matchId'] },
       { fields: ['account_id'] },
+      { fields: ['lowercaseNickname'] },
+    ],
+  },
+);
+
+export interface TrueskillAttributes {
+  account_id?: number;
+  mu?: number;
+  sigma?: number;
+  games?: number;
+}
+
+type TrueskillInstance = Sequelize.Instance<TrueskillAttributes>;
+export const Trueskill = sequelize.define<TrueskillInstance, TrueskillAttributes>('trueskills', {
+    account_id: { type: Sequelize.INTEGER, primaryKey: true },
+    mu: { type: Sequelize.DECIMAL, defaultValue: 25 },
+    sigma: { type: Sequelize.DECIMAL, defaultValue: (25 / 3) },
+    games: { type: Sequelize.INTEGER, defaultValue: 1 },
+  }, {
+    timestamps: false,
+  },
+);
+
+export interface HeropickAttributes {
+  date?: Date;
+  hero_id?: number;
+  loss?: number;
+  win?: number;
+}
+
+type HeropickInstance = Sequelize.Instance<HeropickAttributes>;
+export const Heropick = sequelize.define<HeropickInstance, HeropickAttributes>('heropicks', {
+    date: { type: Sequelize.DATEONLY },
+    hero_id: { type: Sequelize.INTEGER },
+    loss: { type: Sequelize.INTEGER, defaultValue: 0 },
+    win: { type: Sequelize.INTEGER, defaultValue: 0 },
+  }, {
+    timestamps: false,
+    indexes: [
+      { unique: true, fields: ['date', 'hero_id'] },
     ],
   },
 );

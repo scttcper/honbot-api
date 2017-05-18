@@ -1,30 +1,29 @@
 import * as moment from 'moment';
 
+import { Heropick, PlayerAttributes } from '../models';
 import mongo from './db';
 import { client, getCache } from './redis';
 
 /**
  * Uses match date to update pick w/l for hero_id
  */
-export async function heroPick(match: any) {
+export async function heroPick(players: PlayerAttributes[], day: Date) {
   const db = await mongo;
-  const date = moment(match.date).startOf('day').toDate();
-  for (const p of match.players) {
+  const date = moment(day).startOf('day').toDate();
+  const promises = [];
+  for (const p of players) {
     if (p.hero_id === 0) {
       continue;
     }
-    const query: any = {
-      date,
-      hero_id: p.hero_id,
-    };
-    const update: any = { $inc: { } };
-    if (p.win) {
-      update.$inc.win = 1;
-    } else {
-      update.$inc.loss = 1;
+    const query = { date, hero_id: p.hero_id };
+    const [hero, created] = await Heropick.findOrCreate({ where: query });
+    let inc = 'win';
+    if (!p.win) {
+      inc = 'loss';
     }
-    await db.collection('heropicks').updateOne(query, update, { upsert: true });
+    promises.push(hero.increment(inc));
   }
+  await Promise.all(promises);
 }
 
 export async function heroStats() {
