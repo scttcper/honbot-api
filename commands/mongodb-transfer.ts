@@ -4,7 +4,6 @@ import { Rating, TrueSkill } from 'ts-trueskill';
 import { Db, MongoClient } from 'mongodb';
 
 import { Heropick, Matches, PlayerAttributes, Players, Trueskill, TrueskillAttributes } from '../models';
-import mongo from '../src/db';
 import { heroPick } from '../src/heroes';
 import { calculatePlayerSkill } from '../src/skill';
 
@@ -12,17 +11,14 @@ const ts = new TrueSkill(null, null, null, null, 0);
 
 async function loop() {
   const db = await MongoClient.connect('mongodb://127.0.0.1/hon');
-  const oldest = await db.collection('matches').findOne(
-    { failed: false },
-    {
+  const oldest = await db.collection('matches')
+    .findOne({
+      failed: false,
+    }, {
       sort: { match_id: 1 },
-    },
-  );
-  await Matches.destroy({where: {}});
-  await Players.destroy({where: {}});
-  await Trueskill.destroy({where: {}});
-  await Heropick.destroy({where: {}});
-  let cur = oldest.match_id;
+    });
+  const mid = await Matches.findOne({ order: 'id DESC'});
+  let cur = mid.get('id');
   const promises = [];
   while (true) {
     const batch = await db
