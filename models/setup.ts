@@ -1,6 +1,6 @@
 import { Matches, Players, Trueskill, Heropick, Failed } from './index';
 
-const force = false;
+const force = true;
 
 Matches.sync({ force })
   .then(() => Players.sync({ force }))

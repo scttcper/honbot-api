@@ -19,18 +19,18 @@ async function loop() {
     });
   const mid = await Matches.findOne({ order: 'id DESC' });
   let cur = mid ? mid.get('id') : 0;
-  const promises = [];
   while (true) {
+    const promises = [];
     const batch = await db
       .collection('matches')
       .find({ match_id: { $gt: cur } })
       .sort({ match_id: 1 })
-      .limit(200)
+      .limit(100)
       .toArray();
     cur = batch[batch.length - 1].match_id;
     const players = [];
     const res = [];
-    batch.map(async (m) => {
+    for (const m of batch) {
       delete m.c_state;
       m.id = m.match_id;
       delete m.match_id;
@@ -57,7 +57,7 @@ async function loop() {
       if (batch.length !== 100) {
         return;
       }
-    });
+    }
     await Promise.all([
       Matches.bulkCreate(res),
       Players.bulkCreate(players),
