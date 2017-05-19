@@ -51,7 +51,10 @@ async function loop() {
         players.push(n);
       });
       if (m.setup_nl + m.setup_officl === 2) {
-        await calculatePlayerSkill(m.players);
+        await calculatePlayerSkill(m.players).catch((err) => {
+          console.error(err);
+          process.exit();
+        });
         promises.push(heroPick(m.players, m.date));
       }
       if (batch.length !== 100) {

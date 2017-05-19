@@ -31,6 +31,9 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
       create = true;
       r = new Rating();
     }
+    if (p.team === 0) {
+      continue;
+    }
     teams[p.team - 1].push(r);
     teamCreate[p.team - 1].push(create);
     teamIds[p.team - 1].push(p.account_id);
