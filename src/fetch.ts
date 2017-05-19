@@ -7,7 +7,10 @@ import sleep from './sleep';
 const log = debug('honbot');
 const TOKEN = config.token;
 
-export default async function fetch(matchIds: string[], attempt = 0) {
+export default async function fetch(
+  matchIds: string[] | number[],
+  attempt = 0,
+) {
   if (!matchIds.length) {
     log('Not Enough Matches');
     throw new Error('Not Enough Matches');

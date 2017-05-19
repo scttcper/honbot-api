@@ -17,20 +17,20 @@ async function loop() {
     }, {
       sort: { match_id: 1 },
     });
-  const mid = await Matches.findOne({ order: 'id DESC'});
+  const mid = await Matches.findOne({ order: 'id DESC' });
   let cur = mid ? mid.get('id') : 0;
   const promises = [];
   while (true) {
     const batch = await db
       .collection('matches')
-      .find({ match_id: { $gt: cur }, failed: false })
+      .find({ match_id: { $gt: cur } })
       .sort({ match_id: 1 })
       .limit(200)
       .toArray();
     cur = batch[batch.length - 1].match_id;
     const players = [];
     const res = [];
-    batch.map((m) => {
+    batch.map(async (m) => {
       delete m.c_state;
       m.id = m.match_id;
       delete m.match_id;
@@ -51,7 +51,7 @@ async function loop() {
         players.push(n);
       });
       if (m.setup_nl + m.setup_officl === 2) {
-        promises.push(calculatePlayerSkill(m.players));
+        await calculatePlayerSkill(m.players);
         promises.push(heroPick(m.players, m.date));
       }
       if (batch.length !== 100) {

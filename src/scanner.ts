@@ -3,8 +3,8 @@ import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
 import * as Raven from 'raven';
 
+import { Failed } from '../models';
 import config from '../config';
-import mongo from './db';
 import { findNewest, grabAndSave } from './matches';
 import sleep from './sleep';
 
@@ -47,22 +47,23 @@ async function findNewMatches() {
 
 async function findAllMissing() {
   log('finding');
-  const db = await mongo;
   let cur = 0;
   while (true) {
-    const missing = await db.collection('matches').find({
-      match_id: {$gt: cur},
-      failed: true,
-      attempts: { $lt: 4 } },
-      { limit: 25, fields: { match_id: 1 },
-    }).sort({ match_id: 1 }).toArray();
+    const missing = await Failed.findAll({
+      where: {
+        id: { $gt: cur },
+        attemps: { $lt: 4 },
+      },
+      limit: 25,
+      order: 'id',
+    }).then(n => n.map(x => x.toJSON()));
     if (!missing.length) {
       // wait 30 minutes
       await sleep(1800000, 'no missing found, reset cursor');
       cur = 0;
       continue;
     }
-    const missingIds = missing.map((n) => n.match_id);
+    const missingIds = missing.map((n) => n.id);
     log('Attempting old matches!');
     await grabAndSave(missingIds, false);
     cur = missingIds[missingIds.length - 1];
@@ -72,5 +73,5 @@ async function findAllMissing() {
 
 if (!module.parent) {
   findNewMatches();
-  // findAllMissing();
+  findAllMissing();
 }

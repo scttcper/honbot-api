@@ -1,6 +1,7 @@
 import * as moment from 'moment';
 
-import mongo from './db';
+import { Matches, sequelize } from '../models';
+import config from '../config';
 import { client, getCache } from './redis';
 
 export default async function stats() {
@@ -8,18 +9,24 @@ export default async function stats() {
   if (cache) {
     return JSON.parse(cache);
   }
-  const db = await mongo;
-  const m = db
-    .collection('matches')
-    .count({ failed: false });
+  const matches = await Matches.count();
   const lastDayDate = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
-  const ld = db
-    .collection('matches')
-    .count({ date: { $gt: lastDayDate }, failed: false });
-  const s = db.stats({ scale: 1024 * 1024 });
-  const [matches, lastDay, stats] = await Promise.all<any>([m, ld, s]);
-  const disksize = Math.round((stats.dataSize / 1024) * 100) / 100;
-  const res = { matches, lastDay, disksize };
+  const lastDay = await Matches.count({ where: { date: { $gt: lastDayDate } } });
+  const stats = await sequelize.query(`
+  SELECT
+    CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')
+        THEN pg_catalog.pg_size_pretty(pg_catalog.pg_database_size(d.datname))
+        ELSE 'No Access'
+    END AS SIZE
+  FROM pg_catalog.pg_database d
+    WHERE d.datname = '${config.database}'
+    ORDER BY
+    CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')
+        THEN pg_catalog.pg_database_size(d.datname)
+        ELSE NULL
+    END DESC -- nulls first
+    LIMIT 20`).then((s) => s[0][0].size);
+  const res = { matches, lastDay, stats };
   client.setex('stats:cache', 600, JSON.stringify(res));
   return res;
 }

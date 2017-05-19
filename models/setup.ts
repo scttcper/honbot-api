@@ -1,8 +1,9 @@
-import { Matches, Players, Trueskill, Heropick } from './index';
+import { Matches, Players, Trueskill, Heropick, Failed } from './index';
 
-const force = true;
+const force = false;
 
 Matches.sync({ force })
   .then(() => Players.sync({ force }))
   .then(() => Trueskill.sync({ force }))
-  .then(() => Heropick.sync({ force }));
+  .then(() => Heropick.sync({ force }))
+  .then(() => Failed.sync({ force }));
