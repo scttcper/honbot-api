@@ -232,6 +232,7 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
       { unique: true, fields: ['account_id', 'matchId'] },
       { fields: ['account_id'] },
       { fields: ['lowercaseNickname'] },
+      { fields: ['matchId'] },
     ],
   },
 );
@@ -266,7 +267,7 @@ export interface HeropickAttributes {
 
 type HeropickInstance = Sequelize.Instance<HeropickAttributes>;
 export const Heropick = sequelize.define<HeropickInstance, HeropickAttributes>('heropicks', {
-    date: { type: Sequelize.DATEONLY },
+    date: { type: Sequelize.DATE },
     hero_id: { type: Sequelize.INTEGER },
     loss: { type: Sequelize.INTEGER, defaultValue: 0 },
     win: { type: Sequelize.INTEGER, defaultValue: 0 },

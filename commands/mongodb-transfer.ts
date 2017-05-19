@@ -18,19 +18,19 @@ async function loop() {
       sort: { match_id: 1 },
     });
   const mid = await Matches.findOne({ order: 'id DESC'});
-  let cur = mid.get('id');
+  let cur = mid ? mid.get('id') : 0;
   const promises = [];
   while (true) {
     const batch = await db
       .collection('matches')
       .find({ match_id: { $gt: cur }, failed: false })
       .sort({ match_id: 1 })
-      .limit(100)
+      .limit(200)
       .toArray();
     cur = batch[batch.length - 1].match_id;
     const players = [];
     const res = [];
-    for (const m of batch) {
+    batch.map((m) => {
       delete m.c_state;
       m.id = m.match_id;
       delete m.match_id;
@@ -57,12 +57,15 @@ async function loop() {
       if (batch.length !== 100) {
         return;
       }
-    }
+    });
     await Promise.all([
       Matches.bulkCreate(res),
       Players.bulkCreate(players),
       ...promises,
-    ]);
+    ]).catch((err) => {
+      console.error(err);
+      process.exit();
+    });
   }
 }
 loop().then(() => process.exit()).catch((e) => console.log(e));

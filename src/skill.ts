@@ -8,14 +8,9 @@ const ts = new TrueSkill(null, null, null, null, 0);
 
 export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const accountIds = players.map((n) => n.account_id);
-  const query = { where: { account_id: {$in: accountIds } } };
-  const res: TrueskillAttributes[] = [];
-  for (const i of accountIds) {
-    const r = await Trueskill
-      .findOrCreate({ where: { account_id: i } })
-      .then(([n, created]) => n.toJSON());
-    res.push(r);
-  }
+  const res = await Trueskill
+    .findAll({ where: { account_id: { $in: accountIds } } })
+    .then((n) => n.map((x) => x.toJSON()));
   // const found = current.map((n) => n.account_id);
   // const missing = _.difference(found, accountIds);
   const teams = [[], []];
@@ -23,7 +18,12 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const teamWin = [0, 0];
   for (const p of players) {
     const cur: TrueskillAttributes = _.find(res, _.matchesProperty('account_id', p.account_id));
-    const r = new Rating(cur.mu, cur.sigma);
+    let r: Rating;
+    if (cur) {
+      r = new Rating(cur.mu, cur.sigma);
+    } else {
+      r = new Rating();
+    }
     teams[p.team - 1].push(r);
     teamIds[p.team - 1].push(p.account_id);
     teamWin[p.team - 1] += +p.win;
@@ -36,14 +36,17 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
     Number(teamWin[1] < teamWin[0]),
   ]);
   const flattenedResults = _.flatten(result);
-  await _.forEach(teamIds, async (value, key) => {
+  const flattendedTeamIds = _.flatten(teamIds);
+  const updates = [];
+  _.forEach(flattendedTeamIds, (value, key) => {
     const q: any = {
       mu: flattenedResults[key].mu,
       sigma: flattenedResults[key].sigma,
       games: Sequelize.literal('games + 1'),
     };
-    await Trueskill.update(q, { where: { account_id: teamIds[key] } });
+    updates.push(Trueskill.update(q, { where: { account_id: value }, returning: false }));
   });
+  return updates;
 }
 
 export async function matchSkill(players: PlayerAttributes[]) {

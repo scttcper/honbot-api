@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as moment from 'moment';
 
 import { Heropick, PlayerAttributes } from '../models';
@@ -8,20 +9,25 @@ import { client, getCache } from './redis';
  */
 export async function heroPick(players: PlayerAttributes[], day: Date) {
   const date = moment(day).startOf('day').toDate();
-  const promises = [];
-  for (const p of players) {
+  const heroIds = players.map((n) => n.hero_id);
+  const heroes = await Heropick
+    .findAll({ where: { hero_id: {$in: heroIds }, date } });
+  return Promise.all(players.map((p) => {
     if (p.hero_id === 0) {
-      continue;
+      return;
     }
-    const query = { date, hero_id: p.hero_id };
-    const [hero, created] = await Heropick.findOrCreate({ where: query });
     let inc = 'win';
     if (!p.win) {
       inc = 'loss';
     }
-    promises.push(hero.increment(inc));
-  }
-  await Promise.all(promises);
+    const hero = _.find(heroes, (h) => h.get('hero_id') === p.hero_id);
+    if (hero) {
+      return hero.increment(inc);
+    }
+    return Heropick
+      .findOrCreate({ where: { date, hero_id: p.hero_id } })
+      .then(([h, created]) => h.increment(inc));
+  }));
 }
 
 export async function heroStats() {
