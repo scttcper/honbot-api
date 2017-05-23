@@ -41,7 +41,7 @@ async function findNewMatches() {
     log('Finding new matches!');
     await grabAndSave(matchIds, true);
     last = newest;
-    await sleep(800, 'findNewMatches sleep');
+    await sleep(2000, 'findNewMatches sleep');
   }
 }
 
@@ -67,7 +67,7 @@ async function findAllMissing() {
     log('Attempting old matches!');
     await grabAndSave(missingIds, false);
     cur = missingIds[missingIds.length - 1];
-    await sleep(5000, 'findAllMissing sleeping');
+    await sleep(10000, 'findAllMissing sleeping');
   }
 }
 
