@@ -1,30 +1,33 @@
+import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import mongo from './db';
+import { Heropick, PlayerAttributes } from '../models';
 import { client, getCache } from './redis';
 
 /**
  * Uses match date to update pick w/l for hero_id
  */
-export async function heroPick(match: any) {
-  const db = await mongo;
-  const date = moment(match.date).startOf('day').toDate();
-  for (const p of match.players) {
+export async function heroPick(players: PlayerAttributes[], day: Date) {
+  const date = moment(day).startOf('day').toDate();
+  const heroIds = players.map((n) => n.hero_id);
+  const heroes = await Heropick
+    .findAll({ where: { hero_id: {$in: heroIds }, date } });
+  return Promise.all(players.map((p) => {
     if (p.hero_id === 0) {
-      continue;
+      return;
     }
-    const query: any = {
-      date,
-      hero_id: p.hero_id,
-    };
-    const update: any = { $inc: { } };
-    if (p.win) {
-      update.$inc.win = 1;
-    } else {
-      update.$inc.loss = 1;
+    let inc = 'win';
+    if (!p.win) {
+      inc = 'loss';
     }
-    await db.collection('heropicks').updateOne(query, update, { upsert: true });
-  }
+    const hero = _.find(heroes, (h) => h.get('hero_id') === p.hero_id);
+    if (hero) {
+      return hero.increment(inc);
+    }
+    return Heropick
+      .findOrCreate({ where: { date, hero_id: p.hero_id } })
+      .then(([h, created]) => h.increment(inc));
+  }));
 }
 
 export async function heroStats() {
@@ -32,7 +35,7 @@ export async function heroStats() {
   if (cache) {
     return JSON.parse(cache);
   }
-  const db = await mongo;
+  const db: any = {};
   const limit = moment().startOf('day').subtract(14, 'days').toDate();
   const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
   const m = db

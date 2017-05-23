@@ -10,6 +10,9 @@
     "no-unused-variable": true,
     "no-namespace": false,
     "interface-name": false,
-    "callable-types": false
+    "callable-types": false,
+    "ordered-imports": false,
+    "arrow-parens": false,
+    "no-var-requires": false
   }
 }

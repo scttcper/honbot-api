@@ -1,11 +1,10 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
-import mongo from './db';
 
+import { Matches, Players, Failed } from '../models';
 import fetch from './fetch';
 import { heroPick } from './heroes';
-import { IMatchPlayer } from './interfaces';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
 import sleep from './sleep';
@@ -13,28 +12,22 @@ import sleep from './sleep';
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
-export async function findNewest() {
-  const db = await mongo;
-  return db
-    .collection('matches')
-    .findOne(
-      { failed : false },
-      { sort: { match_id: -1 },
-    });
+export async function findNewest(): Promise<any> {
+  const match = await Matches.findOne({
+    order: [['id', 'DESC']],
+  });
+  if (match) {
+    return match.toJSON();
+  }
+  return undefined;
 }
 
 export async function findOldest() {
-  const db = await mongo;
-  return db
-    .collection('matches')
-    .findOne(
-      { failed : false },
-      { sort: { match_id: 1 },
-    });
+  return Matches.findOne();
 }
 
 function mapToNumber(obj) {
-  return _.mapValues(obj, (n) => {
+  return _.mapValues(obj, n => {
     const b = Number(n);
     if (_.isNaN(b)) {
       return n;
@@ -43,23 +36,34 @@ function mapToNumber(obj) {
   });
 }
 
-export function parseMultimatch(raw: any, attempted: string[]) {
-  raw[0] = raw[0].map((setup) => {
+export async function parseMultimatch(raw: any, attempted: string[]) {
+  raw[0] = raw[0].map(setup => {
     return mapToNumber(setup);
   });
   // put items in array, remove null items
-  raw[1] = raw[1].map((items) => {
+  raw[1] = raw[1].map(items => {
     const r = {
       items: [],
       match_id: items.match_id,
       account_id: parseInt(items.account_id, 10),
     };
-    ITEM_SLOTS.map((slot) => {
+    ITEM_SLOTS.map(slot => {
       if (items[slot]) {
         r.items.push(parseInt(items[slot], 10));
       }
     });
     return r;
+  });
+  raw[0] = raw[0].map(n => {
+    const x = {};
+    _.keys(n).map(k => {
+      if (k === 'match_id') {
+        x[k] = n[k];
+        return;
+      }
+      x[`setup_${k}`] = n[k];
+    });
+    return x;
   });
   const matchSetups = _.groupBy(raw[0], _.property('match_id'));
   const matchPlayerItems = _.groupBy(raw[1], _.property('match_id'));
@@ -68,37 +72,46 @@ export function parseMultimatch(raw: any, attempted: string[]) {
   const matches = [];
   const failed: number[] = [];
   for (const m of attempted) {
-    const match: any = {};
-    if (!matchSetups[m] || !matchInfo[m] || !matchSetups[m].length || !matchPlayer[m] || !matchPlayer[m].length) {
+    if (
+      !matchSetups[m] ||
+      !matchInfo[m] ||
+      !matchSetups[m].length ||
+      !matchPlayer[m] ||
+      !matchPlayer[m].length
+    ) {
       log(`failed ${m}`);
       failed.push(parseInt(m, 10));
       continue;
     }
+    const match: any = { ...matchSetups[m][0] };
     const info: any = matchInfo[m][0];
-    match.match_id = parseInt(m, 10);
-    match.setup = matchSetups[m][0];
-    match.date = moment.tz(info.mdt, 'YYYY-MM-DD HH:mm:ss', 'America/Detroit').toDate();
+    match.id = parseInt(m, 10);
+    match.date = moment
+      .tz(info.mdt, 'YYYY-MM-DD HH:mm:ss', 'America/Detroit')
+      .toDate();
     match.length = parseInt(info.time_played, 10);
     match.version = info.version;
     match.map = info.map;
     match.server_id = parseInt(info.server_id, 10);
-    match.c_state = parseInt(info.c_state, 10);
     const minutes = moment.duration(match.length, 'seconds').asMinutes();
-    const players = matchPlayer[m] || [];
+    const players: any[] = matchPlayer[m] || [];
     match.mode = getMode(match);
     match.type = getType(match.mode);
     match.failed = false;
-    match.players = players.map((n: IMatchPlayer) => {
+    match.players = players.map(n => {
       const player: any = {};
       player.account_id = parseInt(n.account_id, 10);
-      player.match_id = parseInt(m, 10);
+      player.matchId = parseInt(m, 10);
       player.nickname = n.nickname;
       // use toLower because for some reason null nicknames
       player.lowercaseNickname = _.toLower(n.nickname);
       player.clan_id = parseInt(n.clan_id, 10);
       player.hero_id = parseInt(n.hero_id, 10);
       player.position = parseInt(n.position, 10);
-      const itemObj = _.find(matchPlayerItems[m], _.matchesProperty('account_id', player.account_id));
+      const itemObj = _.find(
+        matchPlayerItems[m],
+        _.matchesProperty('account_id', player.account_id),
+      );
       player.items = itemObj ? itemObj.items : [];
       player.team = parseInt(n.team, 10);
       player.level = parseInt(n.level, 10);
@@ -115,7 +128,8 @@ export function parseMultimatch(raw: any, attempted: string[]) {
       player.deaths = parseInt(n.deaths, 10);
       player.goldlost2death = parseInt(n.goldlost2death, 10);
       player.secs_dead = parseInt(n.secs_dead, 10);
-      player.cs = parseInt(n.teamcreepkills, 10) + parseInt(n.neutralcreepkills, 10);
+      player.cs =
+        parseInt(n.teamcreepkills, 10) + parseInt(n.neutralcreepkills, 10);
       player.bdmg = parseInt(n.bdmg, 10);
       player.razed = parseInt(n.razed, 10);
       player.denies = parseInt(n.denies, 10);
@@ -163,39 +177,42 @@ export function parseMultimatch(raw: any, attempted: string[]) {
       player.apm = _.round(player.actions / minutes, 3) || 0;
       return player;
     });
-    if (match.setup.nl + match.setup.officl === 2) {
-      calculatePlayerSkill(match);
-      heroPick(match);
+    if (match.setup_nl + match.setup_officl === 2) {
+      await Promise.all([
+        calculatePlayerSkill(match.players),
+        heroPick(match.players, match.date),
+      ]);
     }
     matches.push(match);
   }
   return [matches, failed];
 }
 
-export async function grabAndSave(matchIds: string[], catchFail: boolean = true) {
+export async function grabAndSave(
+  matchIds: any[],
+  catchFail: boolean = true,
+) {
   const res = await fetch(matchIds);
   if ((!res || !res.length) && catchFail) {
     await sleep(100000, 'no results from grab');
     return;
   }
-  const [parsed, failed] = parseMultimatch(res, matchIds);
+  const [parsed, failed] = await parseMultimatch(res, matchIds);
   if (failed.length === matchIds.length && catchFail) {
     log('25 failed, escaping');
     return;
   }
-  const db = await mongo;
   if (parsed.length) {
-    const pids = parsed.map((n) => n.match_id);
+    const pids = parsed.map(n => n.match_id);
     log(`Parsed ${pids.length}`);
-    await db.collection('matches').remove({ match_id: {$in: pids }});
-    await db.collection('matches').insertMany(parsed);
+    await Matches.bulkCreate(parsed).catch(() => _.noop());
+    await Players.bulkCreate(_.flatten(parsed.map(n => n.players)));
   }
   if (failed.length) {
     for (const f of failed) {
-      const fail = { $set: { match_id: f, failed: true }, $inc: { attempts: 1 } };
-      await db
-        .collection('matches')
-        .update({ match_id: f }, fail, { upsert: true });
+      await Failed.findOrCreate({ where: { id: f } }).then(([fail, b]) =>
+        fail.increment('attempts'),
+      );
     }
   }
 }
