@@ -14,6 +14,7 @@ function addCompetitor(obj, nickname, win) {
 
 export default async function(lowercaseNickname: string) {
   const lastWeek = moment().subtract(1, 'week').toDate();
+  // TODO: consolidate into one query
   const matchIds = await Players
     .findAll({
       where: { lowercaseNickname },
