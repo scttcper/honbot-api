@@ -12,7 +12,7 @@ export default async function stats() {
   const matches = await Matches.count();
   const lastDayDate = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
   const lastDay = await Matches.count({ where: { date: { $gt: lastDayDate } } });
-  const stats = await sequelize.query(`
+  const disksize = await sequelize.query(`
   SELECT
     CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')
         THEN pg_catalog.pg_size_pretty(pg_catalog.pg_database_size(d.datname))
@@ -26,7 +26,7 @@ export default async function stats() {
         ELSE NULL
     END DESC -- nulls first
     LIMIT 20`).then((s) => s[0][0].size);
-  const res = { matches, lastDay, stats };
+  const res = { matches, lastDay, disksize };
   client.setex('stats:cache', 600, JSON.stringify(res));
   return res;
 }
