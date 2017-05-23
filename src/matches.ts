@@ -209,6 +209,7 @@ export async function grabAndSave(
     await Players.bulkCreate(_.flatten(parsed.map(n => n.players)));
   }
   if (failed.length) {
+    // TODO: async
     for (const f of failed) {
       await Failed.findOrCreate({ where: { id: f } }).then(([fail, b]) =>
         fail.increment('attempts'),
