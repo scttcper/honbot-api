@@ -220,10 +220,10 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
     actions: { type: Sequelize.INTEGER },
     gold: { type: Sequelize.INTEGER },
     exp: { type: Sequelize.INTEGER },
-    kdr: { type: Sequelize.DECIMAL },
-    gpm: { type: Sequelize.DECIMAL },
-    xpm: { type: Sequelize.DECIMAL },
-    apm: { type: Sequelize.DECIMAL },
+    kdr: { type: Sequelize.FLOAT },
+    gpm: { type: Sequelize.FLOAT },
+    xpm: { type: Sequelize.FLOAT },
+    apm: { type: Sequelize.FLOAT },
   }, {
     timestamps: false,
     indexes: [
@@ -247,8 +247,8 @@ export interface TrueskillAttributes {
 type TrueskillInstance = Sequelize.Instance<TrueskillAttributes>;
 export const Trueskill = sequelize.define<TrueskillInstance, TrueskillAttributes>('trueskills', {
     account_id: { type: Sequelize.INTEGER, primaryKey: true },
-    mu: { type: Sequelize.DECIMAL, defaultValue: 25 },
-    sigma: { type: Sequelize.DECIMAL, defaultValue: (25 / 3) },
+    mu: { type: Sequelize.FLOAT, defaultValue: 25 },
+    sigma: { type: Sequelize.FLOAT, defaultValue: (25 / 3) },
     games: { type: Sequelize.INTEGER, defaultValue: 1 },
   }, {
     timestamps: false,
