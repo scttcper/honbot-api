@@ -72,6 +72,6 @@ async function findAllMissing() {
 }
 
 if (!module.parent) {
-  // findNewMatches();
+  findNewMatches();
   findAllMissing();
 }
