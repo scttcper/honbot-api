@@ -7,7 +7,7 @@
     "build": "rimraf build; tsc -p .",
     "build:watch": "tsc -p . -w",
     "start": "NODE_ENV=dev DEBUG=honbot* nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "start-scanner": "NODE_ENV=dev DEBUG=honbot* nodemon --watch 'src/scanner.ts' --exec 'ts-node' src/scanner.ts",
+    "scanner": "NODE_ENV=dev DEBUG=honbot* nodemon --watch 'src/scanner.ts' --exec 'ts-node' src/scanner.ts",
     "test": "mocha --require ts-node/register test/*.spec.ts",
     "coverage": "nyc npm test",
     "lint": "tslint \"src/**/*.ts\""

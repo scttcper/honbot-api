@@ -14,7 +14,7 @@ const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
 export async function findNewest(): Promise<any> {
   const match = await Matches.findOne({
-    order: [['match_id', 'DESC']],
+    order: [['id', 'DESC']],
   });
   if (match) {
     return match.toJSON();

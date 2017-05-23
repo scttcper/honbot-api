@@ -23,11 +23,11 @@ async function findNewMatches() {
   let last = 0;
   while (true) {
     const newestMatch = await findNewest();
-    if (newestMatch && newestMatch.match_id === last) {
+    if (newestMatch && newestMatch.id === last) {
       await sleep(1200000, 'made no forward progress');
     }
     if (newestMatch) {
-      log('Newest', newestMatch.match_id);
+      log('Newest', newestMatch.id);
       const minutes = moment().diff(moment(newestMatch.date), 'minutes');
       const hours = Math.round(minutes / 60);
       log(`Age: ${hours} hours`);
@@ -36,7 +36,7 @@ async function findNewMatches() {
         continue;
       }
     }
-    const newest = newestMatch ? newestMatch.match_id : STARTING_MATCH_ID;
+    const newest = newestMatch ? newestMatch.id : STARTING_MATCH_ID;
     const matchIds = _.range(newest + 1, newest + BATCH_SIZE).map(String);
     log('Finding new matches!');
     await grabAndSave(matchIds, true);
@@ -52,7 +52,7 @@ async function findAllMissing() {
     const missing = await Failed.findAll({
       where: {
         id: { $gt: cur },
-        attemps: { $lt: 4 },
+        attempts: { $lt: 4 },
       },
       limit: 25,
       order: 'id',
@@ -72,6 +72,6 @@ async function findAllMissing() {
 }
 
 if (!module.parent) {
-  findNewMatches();
+  // findNewMatches();
   findAllMissing();
 }
