@@ -24,6 +24,7 @@ export default async function(lowercaseNickname: string) {
     .findAll({
       where: { id: { $in: matchIds } },
       include: [{ model: Players }],
+      order: [['id', 'DESC']],
     })
     .then((n) => n.map((x) => x.toJSON()));
   const res: any = {};
