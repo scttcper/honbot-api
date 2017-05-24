@@ -24,7 +24,7 @@ async function findNewMatches() {
   while (true) {
     const newestMatch = await findNewest();
     if (newestMatch && newestMatch.id === last) {
-      await sleep(1200000, 'made no forward progress');
+      await sleep(60000, 'made no forward progress');
     }
     if (newestMatch) {
       log('Newest', newestMatch.id);
