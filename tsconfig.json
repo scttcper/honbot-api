@@ -5,7 +5,7 @@
     "noImplicitAny": false,
     "target": "ES2017",
     "lib": ["ES2017"],
-    "module": "ES6",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "build"
   },
