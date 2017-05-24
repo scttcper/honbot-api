@@ -5,12 +5,13 @@ import config from '../config';
 import { client, getCache } from './redis';
 
 export default async function stats() {
-  const cache = await getCache('stats:cache');
-  if (cache) {
-    return JSON.parse(cache);
-  }
+  // const cache = await getCache('stats:cache');
+  // if (cache) {
+  //   return JSON.parse(cache);
+  // }
   const matches = await Matches.count();
   const lastDayDate = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
+  const loadedLastDay = await Matches.count({ where: { createdAt: { $gt: lastDayDate } } });
   const lastDay = await Matches.count({ where: { date: { $gt: lastDayDate } } });
   const disksize = await sequelize.query(`
   SELECT
@@ -26,7 +27,7 @@ export default async function stats() {
         ELSE NULL
     END DESC -- nulls first
     LIMIT 20`).then((s) => s[0][0].size);
-  const res = { matches, lastDay, disksize };
+  const res = { matches, lastDay, disksize, loadedLastDay };
   client.setex('stats:cache', 600, JSON.stringify(res));
   return res;
 }

@@ -48,6 +48,8 @@ export interface MatchAttributes {
   setup_verified_only: number;
   setup_gated: number;
   setup_rapidfire: number;
+
+  createdAt: Date;
 }
 type MatchInstance = Sequelize.Instance<MatchAttributes>;
 export const Matches = sequelize.define<MatchInstance, MatchAttributes>('matches', {
