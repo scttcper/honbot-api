@@ -33,7 +33,7 @@ router.get('/match/:matchId', async (ctx, next) => {
 
 router.get('/matchSkill/:matchId', async (ctx, next) => {
   const id = parseInt(ctx.params.matchId, 10);
-  ctx.assert(_.isNumber(id), 400);
+  ctx.assert(_.isFinite(id), 400);
   const query = { id, setup_nl: 1, setup_officl: 1 };
   const match = await Matches.findOne({
     where: query,
