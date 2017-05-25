@@ -8,7 +8,6 @@ import { heroPick } from './heroes';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
 import sleep from './sleep';
-import { sentry } from './index';
 
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
@@ -178,7 +177,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
       await Promise.all([
         calculatePlayerSkill(match.players),
         heroPick(match.players, match.date),
-      ]).catch((err) => sentry.captureException(err));
+      ]);
     }
     matches.push(match);
   }
