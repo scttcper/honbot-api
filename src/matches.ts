@@ -2,7 +2,7 @@ import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
 
-import { Matches, Players, Failed } from '../models';
+import { Matches, Players, Failed, PlayerAttributes } from '../models';
 import fetch from './fetch';
 import { heroPick } from './heroes';
 import { getMode, getType } from './mode';
@@ -56,7 +56,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
   });
   raw[0] = raw[0].map(n => {
     const x = {};
-    _.keys(n).map(k => {
+    Object.keys(n).map(k => {
       if (k === 'match_id') {
         x[k] = n[k];
         return;
@@ -99,7 +99,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
     match.type = getType(match.mode);
     match.failed = false;
     match.players = players.map(n => {
-      const player: any = {};
+      const player: PlayerAttributes = {};
       player.account_id = parseInt(n.account_id, 10);
       player.matchId = parseInt(m, 10);
       player.nickname = n.nickname;
@@ -128,8 +128,9 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
       player.deaths = parseInt(n.deaths, 10);
       player.goldlost2death = parseInt(n.goldlost2death, 10);
       player.secs_dead = parseInt(n.secs_dead, 10);
-      player.cs =
-        parseInt(n.teamcreepkills, 10) + parseInt(n.neutralcreepkills, 10);
+      player.neutralcreepkills = parseInt(n.neutralcreepkills, 10);
+      player.teamcreepkills = parseInt(n.teamcreepkills, 10);
+      player.cs = player.teamcreepkills + player.neutralcreepkills;
       player.bdmg = parseInt(n.bdmg, 10);
       player.razed = parseInt(n.razed, 10);
       player.denies = parseInt(n.denies, 10);
@@ -156,11 +157,9 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
       player.retribution = parseInt(n.retribution, 10);
       player.used_token = parseInt(n.used_token, 10);
       player.time_earning_exp = parseInt(n.time_earning_exp, 10);
-      player.teamcreepkills = parseInt(n.teamcreepkills, 10);
       player.teamcreepdmg = parseInt(n.teamcreepdmg, 10);
       player.teamcreepexp = parseInt(n.teamcreepexp, 10);
       player.teamcreepgold = parseInt(n.teamcreepgold, 10);
-      player.neutralcreepkills = parseInt(n.neutralcreepkills, 10);
       player.neutralcreepdmg = parseInt(n.neutralcreepdmg, 10);
       player.neutralcreepexp = parseInt(n.neutralcreepexp, 10);
       player.neutralcreepgold = parseInt(n.neutralcreepgold, 10);

@@ -18,7 +18,6 @@ let config = {
   },
   token: 'test',
   port: 5000,
-  retries: 5,
   dsn: '',
   // STARTING_MATCH_ID: 147503111,
   STARTING_MATCH_ID: 149396730,
@@ -29,7 +28,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test') {
   const filename = `./config.${process.env.NODE_ENV}`;
   log(`Using: ${filename}`);
   const imported = require(filename);
-  config = Object.assign({}, config, imported);
+  config = { ...config, ...imported };
 }
 
 export default config;

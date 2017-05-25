@@ -6,38 +6,37 @@ import sleep from './sleep';
 
 const log = debug('honbot');
 const TOKEN = config.token;
+const RETRIES = 15;
 
-export default async function fetch(
-  matchIds: string[] | number[],
-  attempt = 0,
-) {
+async function fetch(matchIds: string[] | number[]) {
   if (!matchIds.length) {
     log('Not Enough Matches');
     throw new Error('Not Enough Matches');
   }
   const joined = matchIds.join('+');
   const url = `https://api.heroesofnewerth.com/multi_match/all/matchids/${joined}/?token=${TOKEN}`;
-  const options = { gzip: true, json: true };
+  const options: request.RequestPromiseOptions = {
+    gzip: true,
+    json: true,
+    resolveWithFullResponse: true,
+    simple: false,
+  };
   log(url);
-  let res;
-  try {
-    res = await request.get(url, options);
-  } catch (e) {
-    log(e.statusCode);
-    if (e.statusCode === 403) {
+  for (let i = 0; i < RETRIES; i++) {
+    const res: request.FullResponse = await request.get(url, options);
+    if (res.statusCode === 200) {
+      return res.body;
+    }
+    if (res.body === 'API User Not Found.') {
       log('WARNING: TOKEN NOT WORKING');
       throw new Error('Misconfigured honbot api token');
     }
-    if (e.statusCode === 404 || e.statusCode === 500) {
+    if (res.statusCode === 404 || res.statusCode === 500) {
       // mark all as failed
       return [[], [], []];
     }
-    if (e.statusCode === 429) {
-      await sleep(1000, '429 from api');
-    }
-    if (attempt < config.retries) {
-      return fetch(matchIds, attempt + 1);
-    }
+    await sleep(1500, `${res.statusCode} from api`);
   }
-  return res;
 }
+
+export default fetch;

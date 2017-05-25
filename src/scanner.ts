@@ -10,11 +10,9 @@ import sleep from './sleep';
 
 const log = debug('honbot');
 
-if (process.env.NODE_ENV !== 'dev') {
-  Raven
-    .config(config.dsn)
-    .install({ captureUnhandledRejections: true });
-}
+const sentry = Raven
+  .config(config.dsn, { autoBreadcrumbs: true })
+  .install({ captureUnhandledRejections: true });
 
 const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
@@ -22,7 +20,9 @@ const BATCH_SIZE = 25;
 async function findNewMatches() {
   let last = 0;
   while (true) {
-    const newestMatch = await findNewest();
+    const newestMatch = await findNewest().catch((err) => {
+      sentry.captureException(err);
+    });
     if (newestMatch && newestMatch.id === last) {
       await sleep(60000, 'made no forward progress');
     }
