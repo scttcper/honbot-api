@@ -1,4 +1,5 @@
 import * as Router from 'koa-router';
+import * as _ from 'lodash';
 
 import { Players, Matches, Trueskill, PlayerAttributes } from '../models';
 import { heroStats } from './heroes';
@@ -31,11 +32,9 @@ router.get('/match/:matchId', async (ctx, next) => {
 });
 
 router.get('/matchSkill/:matchId', async (ctx, next) => {
-  const query = {
-    id: parseInt(ctx.params.matchId, 10),
-    setup_nl: 1,
-    setup_officl: 1,
-  };
+  const id = parseInt(ctx.params.matchId, 10);
+  ctx.assert(_.isNumber(id), 400);
+  const query = { id, setup_nl: 1, setup_officl: 1 };
   const match = await Matches.findOne({
     where: query,
     include: [{ model: Players }],
@@ -50,7 +49,7 @@ router.get('/matchSkill/:matchId', async (ctx, next) => {
 
 router.get('/playerSkill/:accountId', async (ctx, next) => {
   const accountId = parseInt(ctx.params.accountId, 10);
-  ctx.assert(accountId, 404);
+  ctx.assert(_.isNumber(accountId), 404);
   const skill = await Trueskill.findById(accountId, { raw: true });
   ctx.body = skill;
   ctx.assert(ctx.body, 404);

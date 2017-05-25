@@ -8,6 +8,7 @@ import { heroPick } from './heroes';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
 import sleep from './sleep';
+import { sentry } from './index';
 
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
@@ -166,11 +167,8 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
       player.actions = parseInt(n.actions, 10);
       player.gold = parseInt(n.gold, 10);
       player.exp = parseInt(n.exp, 10);
-      if (!player.deaths || !player.kills) {
-        player.kdr = player.kills;
-      } else {
-        player.kdr = _.round(player.kills / player.deaths, 3) || 0;
-      }
+      player.kdr = (!player.deaths || !player.kills) ? player.kills :
+        (_.round(player.kills / player.deaths, 3) || 0);
       player.gpm = _.round(player.gold / minutes, 3) || 0;
       player.xpm = _.round(player.exp / minutes, 3) || 0;
       player.apm = _.round(player.actions / minutes, 3) || 0;
@@ -180,7 +178,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
       await Promise.all([
         calculatePlayerSkill(match.players),
         heroPick(match.players, match.date),
-      ]);
+      ]).catch((err) => sentry.captureException(err));
     }
     matches.push(match);
   }

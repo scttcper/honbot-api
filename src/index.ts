@@ -11,14 +11,11 @@ import mainRouter from './routes';
 const log = debug('honbot');
 
 const app = new Koa();
-module.exports = app;
 app.proxy = true;
-if (process.env.NODE_ENV !== 'dev') {
-  const ravenClient = Raven.config(config.dsn).install({
-    captureUnhandledRejections: true,
-  });
-  koaRaven(app, ravenClient);
-}
+const sentry = Raven
+  .config(config.dsn, { autoBreadcrumbs: true })
+  .install({ captureUnhandledRejections: true });
+koaRaven(app, sentry);
 app.use(logger());
 app.use(kcors());
 app.use((ctx, next) => {
@@ -34,3 +31,5 @@ if (!module.parent) {
   app.listen(config.port);
   log(`http://localhost:${config.port}`);
 }
+
+export default app;
