@@ -5,14 +5,16 @@
       "script"      : "build/src/index.js",
       "exec_mode"   : "cluster",
       "instances"   : "2",
+      "kill_timeout": 3000,
       "env": {
         "NODE_ENV": "prod",
         "DEBUG": "honbot*"
       }
     },
     {
-      "name"       : "hbscan",
-      "script"     : "build/src/scanner.js",
+      "name"        : "hbscan",
+      "script"      : "build/src/scanner.js",
+      "kill_timeout": 3000,
       "env": {
         "NODE_ENV": "prod",
         "DEBUG": "honbot*"

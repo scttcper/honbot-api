@@ -16,10 +16,11 @@ const sentry = Raven
 
 const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
+let notExit = true;
 
 async function findNewMatches() {
   let last = 0;
-  while (true) {
+  while (notExit) {
     const newestMatch = await findNewest().catch((err) => {
       sentry.captureException(err);
     });
@@ -27,10 +28,9 @@ async function findNewMatches() {
       await sleep(60000, 'made no forward progress');
     }
     if (newestMatch) {
-      log('Newest', newestMatch.id);
       const minutes = moment().diff(moment(newestMatch.date), 'minutes');
       const hours = Math.round(minutes / 60);
-      log(`Age: ${hours} hours`);
+      log(`Newest: ${newestMatch.id} - Age: ${hours} hours`);
       if (minutes < 140) {
         await sleep(60000, 'matches too recent');
         continue;
@@ -46,10 +46,9 @@ async function findNewMatches() {
 }
 
 async function findAllMissing() {
-  log('finding');
   let cur = 0;
   const hourAgo = moment().subtract(1, 'hour').toDate();
-  while (true) {
+  while (notExit) {
     const missing = await Failed
       .findAll({
         where: {
@@ -73,6 +72,14 @@ async function findAllMissing() {
     await sleep(10000, 'findAllMissing sleeping');
   }
 }
+
+process.on('SIGINT', () => {
+  notExit = false;
+  setTimeout(() => {
+    // 300ms later the process kill it self to allow a restart
+    process.exit(0);
+  }, 2000);
+});
 
 if (!module.parent) {
   findNewMatches();
