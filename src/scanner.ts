@@ -55,7 +55,7 @@ async function findAllMissing() {
         where: {
           id: { $gt: cur },
           attempts: { $lt: 4 },
-          updatedAt: { $lt: hourAgo },
+          updatedAt: { $gt: hourAgo },
         },
         limit: 25,
         order: 'id',
