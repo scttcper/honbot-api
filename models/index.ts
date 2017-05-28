@@ -18,7 +18,6 @@ export interface MatchAttributes {
   server_id?: number;
   mode?: string;
   type?: string;
-  failed?: boolean;
   players?: PlayerAttributes[];
 
   setup_no_repick?: number;
@@ -280,6 +279,8 @@ export const Heropick = sequelize.define<HeropickInstance, HeropickAttributes>('
 export interface FailedAttributes {
   id?: number;
   attempts?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 type FailedInstance = Sequelize.Instance<FailedAttributes>;
 export const Failed = sequelize.define<FailedInstance, FailedAttributes>('fails', {
