@@ -45,7 +45,7 @@
     "@types/redis": "^0.12.36",
     "@types/request-promise-native": "^1.0.5",
     "@types/sequelize": "^4.0.55",
-    "chai": "^3.5.0",
+    "chai": "^4.0.0",
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
     "nyc": "^10.3.2",

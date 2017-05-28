@@ -201,15 +201,17 @@ export async function grabAndSave(
   if (parsed.length) {
     const pids = parsed.map(n => n.match_id);
     log(`Parsed ${pids.length}`);
-    await Matches.bulkCreate(parsed).catch(() => _.noop());
+    await Matches.bulkCreate(parsed);
     await Players.bulkCreate(_.flatten(parsed.map(n => n.players)));
+    await Failed.destroy({ where: { id: { $in: pids }}});
   }
   if (failed.length) {
-    // TODO: async
-    for (const f of failed) {
-      await Failed.findOrCreate({ where: { id: f } }).then(([fail, b]) =>
-        fail.increment('attempts'),
-      );
-    }
+    const promises = failed
+      .map((f => Failed
+        .findOrCreate({ where: { id: f } })
+        .then(([fail, b]) =>
+          fail.increment('attempts'),
+        )));
+    await Promise.all(promises);
   }
 }

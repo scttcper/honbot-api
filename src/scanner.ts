@@ -48,22 +48,25 @@ async function findNewMatches() {
 async function findAllMissing() {
   log('finding');
   let cur = 0;
+  const hourAgo = moment().subtract(1, 'hour').toDate();
   while (true) {
-    const missing = await Failed.findAll({
-      where: {
-        id: { $gt: cur },
-        attempts: { $lt: 4 },
-      },
-      limit: 25,
-      order: 'id',
-    }).then(n => n.map(x => x.toJSON()));
+    const missing = await Failed
+      .findAll({
+        where: {
+          id: { $gt: cur },
+          attempts: { $lt: 4 },
+          updatedAt: { $lt: hourAgo },
+        },
+        limit: 25,
+        order: 'id',
+      });
     if (!missing.length) {
       // wait 30 minutes
       await sleep(1800000, 'no missing found, reset cursor');
       cur = 0;
       continue;
     }
-    const missingIds = missing.map((n) => n.id);
+    const missingIds = missing.map(x => x.toJSON().id);
     log('Attempting old matches!');
     await grabAndSave(missingIds, false);
     cur = missingIds[missingIds.length - 1];
@@ -73,5 +76,5 @@ async function findAllMissing() {
 
 if (!module.parent) {
   findNewMatches();
-  // findAllMissing();
+  findAllMissing();
 }
