@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import { Heropick, PlayerAttributes } from '../models';
+import { Heropick, PlayerAttributes, Matches } from '../models';
 import { client, getCache } from './redis';
 
 /**
@@ -38,37 +38,37 @@ export async function heroStats() {
   const db: any = {};
   const limit = moment().startOf('day').subtract(14, 'days').toDate();
   const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
-  const m = db
-    .collection('matches')
+  const date = { $gt: limit, $lt: yesterday };
+  const matches = await Matches
     .count({
-      date: { $gte: limit, $lte: yesterday },
-      type: {$in: ['ranked', 'season']},
+      where: {
+        date,
+        type: { $in: ['ranked', 'season'] },
+      },
     });
-  const h = db
-    .collection('heropicks')
-    .find({ date: { $gte: limit, $lte: yesterday } }, { _id: 0 })
-    .sort({ date: -1 })
-    .toArray();
-  const [matches, heroes] = await Promise.all<any>([m, h]);
-  const res: any = {};
-  const avg = {};
-  const week = {};
-  heroes.map((n) => {
-    if (!avg[n.hero_id]) {
-      avg[n.hero_id] = { hero_id: n.hero_id, win: 0, loss: 0 };
+  const heroes = await Heropick
+    .findAll({
+      where: { date },
+      order: [['date', 'DESC']],
+    })
+    .then(n => n.map(k => k.toJSON()));
+  const res = { avg: {}, week: {} };
+  const avgCalc = {};
+  heroes.map((n: any) => {
+    if (!avgCalc[n.hero_id]) {
+      avgCalc[n.hero_id] = { hero_id: n.hero_id, win: 0, loss: 0 };
     }
-    if (!week[n.hero_id]) {
-      week[n.hero_id] = [];
+    if (!res.week[n.hero_id]) {
+      res.week[n.hero_id] = [];
     }
     n.win = n.win || 0;
     n.loss = n.loss || 0;
-    avg[n.hero_id].win += n.win;
-    avg[n.hero_id].loss += n.loss;
+    avgCalc[n.hero_id].win += n.win;
+    avgCalc[n.hero_id].loss += n.loss;
     n.wr = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
-    week[n.hero_id].push(n);
+    res.week[n.hero_id].push(n);
   });
-  res.week = week;
-  res.avg = Object.values(avg)
+  res.avg = Object.values(avgCalc)
     .map((n: any) => {
       n.wr = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
       n.pr = (n.win + n.loss) / matches;
