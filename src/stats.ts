@@ -5,10 +5,10 @@ import config from '../config';
 import { client, getCache } from './redis';
 
 export default async function stats() {
-  // const cache = await getCache('stats:cache');
-  // if (cache) {
-  //   return JSON.parse(cache);
-  // }
+  const cache = await getCache('stats:cache');
+  if (cache) {
+    return JSON.parse(cache);
+  }
   const matches = await Matches.count();
   const lastDayDate = moment().subtract(1, 'days').subtract(140, 'minutes').toDate();
   const loadedLastDay = await Matches.count({ where: { createdAt: { $gt: lastDayDate } } });
