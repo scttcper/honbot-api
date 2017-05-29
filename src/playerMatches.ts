@@ -1,3 +1,4 @@
+import * as Sequelize from 'sequelize';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
@@ -11,38 +12,62 @@ function addCompetitor(obj, nickname, win) {
   obj[nickname][wl] += 1;
   obj[nickname].t += 1;
 }
+export async function playerCompetition(lowercaseNickname: string) {
+  const oneWeekAgo = moment().subtract(1, 'year').toDate();
+  const ids = await Players.findAll({
+    where: { lowercaseNickname },
+    include: [{
+      model: Matches,
+      where: { date: { $gt: oneWeekAgo } },
+      attributes: [],
+    }],
+    attributes: ['matchId'],
+  }).then(n => n.map(x => x.toJSON().matchId));
+  const players = await Players.findAll({
+    where: { matchId: { $in: ids } },
+    attributes: ['matchId', 'nickname', 'lowercaseNickname', 'team', 'win'],
+  }).then(n => n.map(x => x.toJSON()));
+  const matches = _.groupBy(players, _.identity('matchId'));
+  const w: any = {};
+  const a: any = {};
+  ids.map((m) => {
+    const p = matches[m];
+    const n = _.find(p, _.matchesProperty('lowercaseNickname', lowercaseNickname));
+    p.map((x) => {
+      if (x.lowercaseNickname === n.lowercaseNickname) {
+        return;
+      }
+      addCompetitor(
+        x.team === n.team ? w : a,
+        x.nickname,
+        n.win,
+      );
+    });
+  });
+  const res = { with: [], against: [] };
+  res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
+  res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
+  return res;
+}
 
-export default async function(lowercaseNickname: string) {
-  const lastWeek = moment().subtract(1, 'week').toDate();
-  // TODO: consolidate into one query
-  const matchIds = await Players
-    .findAll({
-      where: { lowercaseNickname },
-      attributes: ['matchId'],
-    })
-    .then((n) => n.map((x) => x.get('matchId')));
+export async function playerMatches(lowercaseNickname: string) {
   const matches = await Matches
     .findAll({
-      where: { id: { $in: matchIds } },
-      include: [{ model: Players }],
+      include: [{
+        model: Players,
+        where: { lowercaseNickname },
+      }],
       order: [['id', 'DESC']],
     })
     .then((n) => n.map((x) => x.toJSON()));
-  const res: any = {};
-  const w: any = {};
-  const a: any = {};
-  res.wins = 0;
-  res.losses = 0;
+  const res: any = {
+    wins: 0,
+    losses: 0,
+    matches: [],
+    account_id: matches.length ? matches[0].players[0].account_id : 0,
+  };
   res.matches = matches.map((m) => {
-    const n = _.find(m.players, _.matchesProperty('lowercaseNickname', lowercaseNickname));
-    if (moment(m.date).isAfter(lastWeek)) {
-      m.players.forEach((p) => {
-        if (p.account_id !== n.account_id) {
-          const c = p.team === n.team ? w : a;
-          addCompetitor(c, p.nickname, n.win);
-        }
-      });
-    }
+    const n: any = m.players[0];
     res.wins += n.win ? 1 : 0;
     res.losses += n.win ? 0 : 1;
     n.server_id = m.server_id;
@@ -81,7 +106,5 @@ export default async function(lowercaseNickname: string) {
     n.mode = m.mode;
     return n;
   });
-  res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
-  res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   return res;
 }

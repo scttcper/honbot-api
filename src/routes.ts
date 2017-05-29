@@ -5,7 +5,7 @@ import { Players, Matches, Trueskill, PlayerAttributes } from '../models';
 import { heroStats } from './heroes';
 import { matchSkill } from './skill';
 import getTwitchStreams from './twitch';
-import playerMatches from './playerMatches';
+import { playerMatches, playerCompetition } from './playerMatches';
 import stats from './stats';
 
 const router = new Router();
@@ -14,6 +14,12 @@ router.get('/playerMatches/:nickname', async (ctx, next) => {
   const lowercaseNickname = ctx.params.nickname.toLowerCase();
   ctx.body = await playerMatches(lowercaseNickname);
   ctx.assert(ctx.body.matches && ctx.body.matches.length, 404);
+  return next();
+});
+
+router.get('/playerCompetition/:nickname', async (ctx, next) => {
+  const lowercaseNickname = ctx.params.nickname.toLowerCase();
+  ctx.body = await playerCompetition(lowercaseNickname);
   return next();
 });
 
