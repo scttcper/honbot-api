@@ -13,7 +13,7 @@ function addCompetitor(obj, nickname, win) {
   obj[nickname].t += 1;
 }
 export async function playerCompetition(lowercaseNickname: string) {
-  const oneWeekAgo = moment().subtract(1, 'year').toDate();
+  const oneWeekAgo = moment().subtract(1, 'week').toDate();
   const ids = await Players.findAll({
     where: { lowercaseNickname },
     include: [{
