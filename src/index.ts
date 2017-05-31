@@ -12,10 +12,12 @@ const log = debug('honbot');
 
 const app = new Koa();
 app.proxy = true;
-const sentry = Raven
-  .config(config.dsn, { autoBreadcrumbs: true })
-  .install({ captureUnhandledRejections: true });
-koaRaven(app, sentry);
+if (config.dsn) {
+  const sentry = Raven
+    .config(config.dsn, { autoBreadcrumbs: true })
+    .install({ captureUnhandledRejections: true });
+  koaRaven(app, sentry);
+}
 app.use(logger());
 app.use(kcors());
 app.use((ctx, next) => {
