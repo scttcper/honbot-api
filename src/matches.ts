@@ -1,6 +1,5 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
-import * as moment from 'moment-timezone';
 
 import { Matches, Players, Failed } from '../models';
 import { PlayerAttributes } from '../models/interfaces';
@@ -83,9 +82,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
     const match: any = { ...matchSetups[m][0] };
     const info: any = matchInfo[m][0];
     match.id = parseInt(m, 10);
-    match.date = moment
-      .tz(info.mdt, 'YYYY-MM-DD HH:mm:ss', 'America/Detroit')
-      .toDate();
+    match.date = new Date(`${info.mdt}-05:00`);
     match.length = parseInt(info.time_played, 10);
     match.version = info.version;
     match.map = info.map;
