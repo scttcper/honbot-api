@@ -1,7 +1,7 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
-import * as moment from 'moment-timezone';
 import * as Raven from 'raven';
+import { differenceInMinutes, subHours } from 'date-fns';
 
 import { Failed } from '../models';
 import config from '../config';
@@ -28,7 +28,7 @@ async function findNewMatches() {
       await sleep(60000, 'made no forward progress');
     }
     if (newestMatch) {
-      const minutes = moment().diff(moment(newestMatch.date), 'minutes');
+      const minutes = differenceInMinutes(new Date(), new Date(newestMatch.date));
       const hours = Math.round(minutes / 60);
       log(`Newest: ${newestMatch.id} - Age: ${hours} hours`);
       if (minutes < 140) {
@@ -47,7 +47,7 @@ async function findNewMatches() {
 
 async function findAllMissing() {
   let cur = 0;
-  const hourAgo = moment().subtract(1, 'hour').toDate();
+  const hourAgo = subHours(new Date(), 1);
   while (notExit) {
     const missing = await Failed
       .findAll({

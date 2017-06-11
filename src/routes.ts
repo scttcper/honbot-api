@@ -1,7 +1,8 @@
 import * as Router from 'koa-router';
 import * as _ from 'lodash';
 
-import { Players, Matches, Trueskill, PlayerAttributes } from '../models';
+import { Players, Matches, Trueskill } from '../models';
+import { PlayerAttributes } from '../models/interfaces';
 import { heroStats } from './heroes';
 import { matchSkill } from './skill';
 import getTwitchStreams from './twitch';

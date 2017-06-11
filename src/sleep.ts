@@ -1,11 +1,11 @@
 import * as debug from 'debug';
-import * as moment from 'moment-timezone';
+import { distanceInWordsToNow, addMilliseconds } from 'date-fns';
 
 const log = debug('honbot');
 
 export default function sleep(duration: number, reason: string = 'waiting') {
   return new Promise((resolve, reject) => {
-    const time = moment.duration(duration, 'milliseconds').humanize();
+    const time = distanceInWordsToNow(addMilliseconds(new Date(), duration));
     log(`Sleeping for ${time} because ${reason}`);
     setTimeout(() => { resolve(0); }, duration);
   });

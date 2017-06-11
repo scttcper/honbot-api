@@ -90,7 +90,7 @@ export async function parseMultimatch(raw: any, attempted: string[]) {
     match.version = info.version;
     match.map = info.map;
     match.server_id = parseInt(info.server_id, 10);
-    const minutes = moment.duration(match.length, 'seconds').asMinutes();
+    const minutes = match.length / 60;
     const players: any[] = matchPlayer[m] || [];
     match.mode = getMode(match);
     match.type = getType(match.mode);

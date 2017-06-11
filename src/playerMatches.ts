@@ -1,6 +1,6 @@
 import * as Sequelize from 'sequelize';
 import * as _ from 'lodash';
-import * as moment from 'moment';
+import { subDays } from 'date-fns';
 
 import { Players, Matches } from '../models';
 
@@ -13,7 +13,7 @@ function addCompetitor(obj, nickname, win) {
   obj[nickname].t += 1;
 }
 export async function playerCompetition(lowercaseNickname: string) {
-  const oneWeekAgo = moment().subtract(1, 'week').toDate();
+  const oneWeekAgo = subDays(new Date(), 7);
   const ids = await Players.findAll({
     where: { lowercaseNickname },
     include: [{

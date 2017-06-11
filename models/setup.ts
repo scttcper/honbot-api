@@ -1,6 +1,6 @@
 import { Matches, Players, Trueskill, Heropick, Failed } from './index';
 
-export function setup(force = false) {
+export function setup(force = false): any {
   return Matches.sync({ force })
     .then(() => Players.sync({ force }))
     .then(() => Trueskill.sync({ force }))
