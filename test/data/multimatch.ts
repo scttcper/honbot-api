@@ -1,4 +1,4 @@
-export = [
+export const multimatch: any = [
   [
     {
       match_id: '147503111',

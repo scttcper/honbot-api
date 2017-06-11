@@ -1,11 +1,12 @@
 import * as debug from 'debug';
 
 const log = debug('honbot');
-log(`Env: ${process.env.NODE_ENV || 'test'}`);
+const env = process.env.NODE_ENV || 'test';
+log(`Env: ${env}`);
 
 let config = {
   username: '',
-  database: 'hon',
+  database: 'hontest',
   password: '',
   db: {
     host: 'localhost',
@@ -15,20 +16,17 @@ let config = {
       min: 0,
       idle: 1000,
     },
+    logging: true,
   },
   token: 'test',
   port: 5000,
   dsn: '',
-  // STARTING_MATCH_ID: 147503111,
-  STARTING_MATCH_ID: 149396730,
   twitch: '',
 };
 
-if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test') {
-  const filename = `./config.${process.env.NODE_ENV}`;
-  log(`Using: ${filename}`);
-  const imported = require(filename);
-  config = { ...config, ...imported };
-}
+const filename = `./config.${env}`;
+log(`Using: ${filename}`);
+const imported = require(filename);
+config = { ...config, ...imported };
 
 export default config;

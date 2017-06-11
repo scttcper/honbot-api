@@ -1,9 +1,13 @@
 import { Matches, Players, Trueskill, Heropick, Failed } from './index';
 
-const force = false;
+export function setup(force = false) {
+  return Matches.sync({ force })
+    .then(() => Players.sync({ force }))
+    .then(() => Trueskill.sync({ force }))
+    .then(() => Heropick.sync({ force }))
+    .then(() => Failed.sync({ force }));
+}
 
-Matches.sync({ force })
-  .then(() => Players.sync({ force }))
-  .then(() => Trueskill.sync({ force }))
-  .then(() => Heropick.sync({ force }))
-  .then(() => Failed.sync({ force }));
+if (!module.parent) {
+  setup();
+}

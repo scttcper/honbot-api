@@ -1,9 +1,19 @@
 module.exports = {
-  db: 'mongodb://127.0.0.1/hontest',
+  username: '',
+  database: 'hontest',
+  password: '',
+  db: {
+    host: 'localhost',
+    dialect: 'postgres',
+    pool: {
+      max: 10,
+      min: 1,
+      idle: 1000,
+    },
+    logging: false,
+  },
   token: 'test',
   port: 5000,
-  debug: false,
-  retries: 2,
   dsn: false,
   twitch: 'testclient',
 };

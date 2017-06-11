@@ -2,7 +2,8 @@ import * as _ from 'lodash';
 import * as Sequelize from 'sequelize';
 import { Rating, TrueSkill } from 'ts-trueskill';
 
-import { PlayerAttributes, Trueskill, TrueskillAttributes } from '../models';
+import { Trueskill } from '../models';
+import { PlayerAttributes, TrueskillAttributes } from '../models/interfaces';
 
 const ts = new TrueSkill(null, null, null, null, 0);
 

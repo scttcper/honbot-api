@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "sourceMap": true,
-    "noImplicitAny": false,
-    "target": "ES2017",
-    "lib": ["ES2017"],
-    "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "build"
+    "target": "es5",
+    "module":"commonjs",
+    "lib": ["es2016"],
+    "sourceMap": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "build",
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src/**/*",

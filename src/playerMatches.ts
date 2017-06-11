@@ -30,7 +30,7 @@ export async function playerCompetition(lowercaseNickname: string) {
   const matches = _.groupBy(players, _.identity('matchId'));
   const w: any = {};
   const a: any = {};
-  ids.map((m) => {
+  ids.map((m: any) => {
     const p = matches[m];
     const n = _.find(p, _.matchesProperty('lowercaseNickname', lowercaseNickname));
     p.map((x) => {

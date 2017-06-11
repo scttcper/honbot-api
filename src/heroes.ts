@@ -1,17 +1,18 @@
 import * as _ from 'lodash';
-import * as moment from 'moment';
+import { startOfDay, subDays } from 'date-fns';
 
-import { Heropick, PlayerAttributes, Matches } from '../models';
+import { Heropick, Matches } from '../models';
+import { PlayerAttributes } from '../models/interfaces';
 import { client, getCache } from './redis';
 
 /**
  * Uses match date to update pick w/l for hero_id
  */
-export async function heroPick(players: PlayerAttributes[], day: Date) {
-  const date = moment(day).startOf('day').toDate();
+export async function heroPick(players: PlayerAttributes[], day: Date): Promise<any> {
+  const date = startOfDay(new Date(day));
   const heroIds = players.map((n) => n.hero_id);
   const heroes = await Heropick
-    .findAll({ where: { hero_id: {$in: heroIds }, date } });
+    .findAll({ where: { hero_id: { $in: heroIds }, date } });
   return Promise.all(players.map((p) => {
     if (p.hero_id === 0) {
       return;
@@ -25,8 +26,11 @@ export async function heroPick(players: PlayerAttributes[], day: Date) {
       return hero.increment(inc);
     }
     return Heropick
-      .findOrCreate({ where: { date, hero_id: p.hero_id } })
-      .then(([h, created]) => h.increment(inc));
+      .create({ date, hero_id: p.hero_id }, { returning: false })
+      .catch((err) => {
+        return Heropick.findOne({ where: { hero_id: p.hero_id, date }})
+          .then(h => h.increment(inc));
+      });
   }));
 }
 
@@ -36,8 +40,9 @@ export async function heroStats() {
     return JSON.parse(cache);
   }
   const db: any = {};
-  const limit = moment().startOf('day').subtract(14, 'days').toDate();
-  const yesterday = moment().startOf('day').subtract(1, 'days').toDate();
+  const startDay = startOfDay(new Date());
+  const limit = subDays(startDay, 14);
+  const yesterday = subDays(startDay, 1);
   const date = { $gt: limit, $lt: yesterday };
   const matches = await Matches
     .count({
@@ -68,7 +73,7 @@ export async function heroStats() {
     n.wr = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
     res.week[n.hero_id].push(n);
   });
-  res.avg = Object.values(avgCalc)
+  res.avg = _.values(avgCalc)
     .map((n: any) => {
       n.wr = Math.round((n.win / (n.loss + n.win) * 10000)) / 10000;
       n.pr = (n.win + n.loss) / matches;

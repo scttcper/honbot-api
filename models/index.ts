@@ -1,6 +1,13 @@
 import * as Sequelize from 'sequelize';
 
 import config from '../config';
+import {
+  MatchAttributes,
+  PlayerAttributes,
+  TrueskillAttributes,
+  HeropickAttributes,
+  FailedAttributes,
+} from './interfaces';
 
 export const sequelize = new Sequelize(
   config.database,
@@ -9,47 +16,6 @@ export const sequelize = new Sequelize(
   config.db,
 );
 
-export interface MatchAttributes {
-  id?: number;
-  date?: Date;
-  length?: number;
-  version?: string;
-  map?: string;
-  server_id?: number;
-  mode?: string;
-  type?: string;
-  players?: PlayerAttributes[];
-
-  setup_no_repick?: number;
-  setup_no_agi?: number;
-  setup_drp_itm?: number;
-  setup_no_timer?: number;
-  setup_rev_hs?: number;
-  setup_no_swap?: number;
-  setup_no_int?: number;
-  setup_alt_pick?: number;
-  setup_veto?: number;
-  setup_shuf?: number;
-  setup_no_str?: number;
-  setup_no_pups?: number;
-  setup_dup_h?: number;
-  setup_ap?: number;
-  setup_br?: number;
-  setup_em?: number;
-  setup_cas?: number;
-  setup_rs?: number;
-  setup_nl?: number;
-  setup_officl?: number;
-  setup_no_stats?: number;
-  setup_ab?: number;
-  setup_hardcore?: number;
-  setup_dev_heroes?: number;
-  setup_verified_only?: number;
-  setup_gated?: number;
-  setup_rapidfire?: number;
-
-  createdAt?: Date;
-}
 type MatchInstance = Sequelize.Instance<MatchAttributes>;
 export const Matches = sequelize.define<MatchInstance, MatchAttributes>('matches', {
   id: { type: Sequelize.INTEGER, primaryKey: true },
@@ -92,73 +58,6 @@ export const Matches = sequelize.define<MatchInstance, MatchAttributes>('matches
   updatedAt: false,
 });
 
-export interface PlayerAttributes {
-  account_id?: number;
-  matchId?: number;
-  nickname?: string;
-  lowercaseNickname?: string;
-  clan_id?: number;
-  hero_id?: number;
-  position?: number;
-  items?: number[];
-  team?: number;
-  level?: number;
-  win?: boolean;
-  concedes?: number;
-  concedevotes?: number;
-  buybacks?: number;
-  discos?: number;
-  kicked?: number;
-  mmr_change?: number;
-  herodmg?: number;
-  kills?: number;
-  assists?: number;
-  deaths?: number;
-  goldlost2death?: number;
-  secs_dead?: number;
-  cs?: number;
-  bdmg?: number;
-  razed?: number;
-  denies?: number;
-  exp_denied?: number;
-  consumables?: number;
-  wards?: number;
-  bloodlust?: number;
-  doublekill?: number;
-  triplekill?: number;
-  quadkill?: number;
-  annihilation?: number;
-  ks3?: number;
-  ks4?: number;
-  ks5?: number;
-  ks6?: number;
-  ks7?: number;
-  ks8?: number;
-  ks9?: number;
-  ks10?: number;
-  ks15?: number;
-  smackdown?: number;
-  humiliation?: number;
-  nemesis?: number;
-  retribution?: number;
-  used_token?: number;
-  time_earning_exp?: number;
-  teamcreepkills?: number;
-  teamcreepdmg?: number;
-  teamcreepexp?: number;
-  teamcreepgold?: number;
-  neutralcreepkills?: number;
-  neutralcreepdmg?: number;
-  neutralcreepexp?: number;
-  neutralcreepgold?: number;
-  actions?: number;
-  gold?: number;
-  exp?: number;
-  kdr?: number;
-  gpm?: number;
-  xpm?: number;
-  apm?: number;
-}
 type PlayersInstance = Sequelize.Instance<PlayerAttributes>;
 export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('players', {
     account_id: { type: Sequelize.INTEGER },
@@ -228,8 +127,7 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
   }, {
     timestamps: false,
     indexes: [
-      { unique: true, fields: ['account_id', 'matchId'] },
-      { fields: ['account_id'] },
+      { unique: false, fields: ['account_id'] },
       { fields: ['lowercaseNickname'] },
       { fields: ['matchId'] },
     ],
@@ -239,12 +137,6 @@ export const Players = sequelize.define<PlayersInstance, PlayerAttributes>('play
 Players.belongsTo(Matches);
 Matches.hasMany(Players);
 
-export interface TrueskillAttributes {
-  account_id?: number;
-  mu?: number;
-  sigma?: number;
-  games?: number;
-}
 type TrueskillInstance = Sequelize.Instance<TrueskillAttributes>;
 export const Trueskill = sequelize.define<TrueskillInstance, TrueskillAttributes>('trueskills', {
     account_id: { type: Sequelize.INTEGER, primaryKey: true },
@@ -256,32 +148,20 @@ export const Trueskill = sequelize.define<TrueskillInstance, TrueskillAttributes
   },
 );
 
-export interface HeropickAttributes {
-  date?: Date;
-  hero_id?: number;
-  loss?: number;
-  win?: number;
-}
 type HeropickInstance = Sequelize.Instance<HeropickAttributes>;
 export const Heropick = sequelize.define<HeropickInstance, HeropickAttributes>('heropicks', {
-    date: { type: Sequelize.DATE },
-    hero_id: { type: Sequelize.INTEGER },
+    date: { type: Sequelize.DATE, unique: 'compositeIndex' },
+    hero_id: { type: Sequelize.INTEGER, unique: 'compositeIndex' },
     loss: { type: Sequelize.INTEGER, defaultValue: 0 },
     win: { type: Sequelize.INTEGER, defaultValue: 0 },
   }, {
     timestamps: false,
     indexes: [
-      { unique: true, fields: ['date', 'hero_id'] },
+      { fields: ['date'] },
     ],
   },
 );
 
-export interface FailedAttributes {
-  id?: number;
-  attempts?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
 type FailedInstance = Sequelize.Instance<FailedAttributes>;
 export const Failed = sequelize.define<FailedInstance, FailedAttributes>('fails', {
     id: { type: Sequelize.INTEGER, primaryKey: true },
