@@ -32,7 +32,7 @@ router.get('/twitchStreams', async (ctx, next) => {
 router.get('/match/:matchId', async (ctx, next) => {
   const id = parseInt(ctx.params.matchId, 10);
   ctx.assert(_.isFinite(id), 400, 'Match ID must be number');
-  ctx.assert(id >= 149396730, 400, 'Match ID does not exist');
+  ctx.assert(id >= 147503112, 400, 'Match ID does not exist');
   const match = await Matches.findById(id, {
     include: [{ model: Players }],
   });
@@ -44,7 +44,7 @@ router.get('/match/:matchId', async (ctx, next) => {
 router.get('/matchSkill/:matchId', async (ctx, next) => {
   const id = parseInt(ctx.params.matchId, 10);
   ctx.assert(_.isFinite(id), 400, 'Match ID must be number');
-  ctx.assert(id >= 149396730, 400, 'Match ID does not exist');
+  ctx.assert(id >= 147503112, 400, 'Match ID does not exist');
   const query = { id, setup_nl: 1, setup_officl: 1 };
   const match = await Matches.findOne({
     where: query,

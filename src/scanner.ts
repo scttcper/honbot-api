@@ -14,6 +14,7 @@ const sentry = Raven
   .config(config.dsn, { autoBreadcrumbs: true })
   .install({ captureUnhandledRejections: true });
 
+// const STARTING_MATCH_ID = 147503112;
 const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
 let notExit = true;
