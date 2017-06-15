@@ -16,7 +16,7 @@ let config = {
       min: 0,
       idle: 1000,
     },
-    logging: true,
+    logging: false,
   },
   token: 'test',
   port: 5000,

@@ -70,7 +70,7 @@ router.get('/playerSkill/:accountId', async (ctx, next) => {
 router.get('/latestMatches', async (ctx, next) => {
   const matches = await Matches.findAll({
     include: [{ model: Players }],
-    order: 'id DESC',
+    order: [['id', 'DESC']],
     limit: 10,
   });
   ctx.body = matches;
