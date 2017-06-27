@@ -22,22 +22,22 @@ let notExit = true;
 async function findNewMatches() {
   let last = 0;
   while (notExit) {
-    const newestMatch = await findNewest().catch((err) => {
+    const [newestMatchId, newestMatchDate] = await findNewest().catch((err) => {
       sentry.captureException(err);
     });
-    if (newestMatch && newestMatch.id === last) {
+    if (newestMatchId && newestMatchId === last) {
       await sleep(60000, 'made no forward progress');
     }
-    if (newestMatch) {
-      const minutes = differenceInMinutes(new Date(), new Date(newestMatch.date));
+    if (newestMatchId) {
+      const minutes = differenceInMinutes(new Date(), new Date(newestMatchDate));
       const hours = Math.round(minutes / 60);
-      log(`Newest: ${newestMatch.id} - Age: ${hours} hours`);
+      log(`Newest: ${newestMatchId} - Age: ${hours} hours`);
       if (minutes < 140) {
         await sleep(60000, 'matches too recent');
         continue;
       }
     }
-    const newest = newestMatch ? newestMatch.id : STARTING_MATCH_ID;
+    const newest = newestMatchId ? newestMatchId : STARTING_MATCH_ID;
     const matchIds = _.range(newest + 1, newest + BATCH_SIZE).map(String);
     log('Finding new matches!');
     await grabAndSave(matchIds, true);

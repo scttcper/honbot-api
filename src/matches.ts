@@ -13,13 +13,16 @@ const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
 export async function findNewest(): Promise<any> {
-  const match = await Matches.findOne({
-    order: [['id', 'DESC']],
-  });
-  if (match) {
-    return match.toJSON();
+  const match = await Matches.findOne({ order: [['id', 'DESC']] });
+  const failed = await Failed.findOne({ order: [['id', 'DESC']] });
+  if (!match && !failed) {
+    return [undefined, undefined];
   }
-  return undefined;
+  if (Number(match.get('id')) > Number(failed.get('id'))) {
+    return [match.get('id'), match.get('date')];
+  } else {
+    return [failed.get('id'), match.get('date')];
+  }
 }
 
 function mapToNumber(obj: any) {
