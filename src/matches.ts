@@ -188,10 +188,10 @@ export async function grabAndSave(
     return;
   }
   const [parsed, failed] = await parseMultimatch(res, matchIds);
-  if (failed.length === matchIds.length && catchFail) {
-    log('25 failed, escaping');
-    return;
-  }
+  // if (failed.length === matchIds.length && catchFail) {
+  //   log('25 failed, escaping');
+  //   return;
+  // }
   if (parsed.length) {
     const pids = parsed.map(n => n.match_id);
     log(`Parsed ${pids.length}`);
