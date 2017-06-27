@@ -58,7 +58,7 @@ async function findAllMissing() {
           updatedAt: { $lt: hourAgo },
         },
         limit: 25,
-        order: 'id',
+        order: ['id'],
       });
     if (!missing.length) {
       // wait 30 minutes
