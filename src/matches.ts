@@ -12,16 +12,18 @@ import sleep from './sleep';
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
-export async function findNewest(): Promise<any> {
+export async function findNewest() {
   const match = await Matches.findOne({ order: [['id', 'DESC']] });
   const failed = await Failed.findOne({ order: [['id', 'DESC']] });
   if (!match && !failed) {
     return [undefined, undefined];
   }
-  if (Number(match.get('id')) > Number(failed.get('id'))) {
-    return [match.get('id'), match.get('date')];
+  const m = Number(match.get('id') || 0);
+  const f = Number(failed.get('id') || 0);
+  if (m > f) {
+    return [match.get('id'), match.get('date'), f - m];
   } else {
-    return [failed.get('id'), match.get('date')];
+    return [failed.get('id'), match.get('date'), f - m];
   }
 }
 

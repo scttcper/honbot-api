@@ -10,7 +10,7 @@ export default async function stats() {
     return JSON.parse(cache);
   }
   const matches = await Matches.count();
-  const lastDayDate = subMinutes(subDays(new Date(), 1), 140);
+  const lastDayDate = subMinutes(subDays(new Date(), 1), 180);
   const loadedLastDay = await Matches.count({ where: { createdAt: { $gt: lastDayDate } } });
   const res = { matches, loadedLastDay };
   client.setex('stats:cache', 600, JSON.stringify(res));
