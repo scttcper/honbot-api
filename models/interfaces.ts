@@ -125,6 +125,6 @@ export interface HeropickAttributes {
 export interface FailedAttributes {
   id?: number;
   attempts?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

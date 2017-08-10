@@ -205,11 +205,14 @@ export async function grabAndSave(
   }
   if (failed.length) {
     const promises = failed
-      .map((f => Failed
-        .findOrCreate({ where: { id: f } })
-        .then(([fail, b]) =>
-          fail.increment('attempts'),
-        )));
+      .map((async (f) => {
+        const fail = await Failed.findById(f);
+        if (fail) {
+          return fail.increment('attempts');
+        } else {
+          return Failed.create({ id: f, attempts: 1 });
+        }
+      }));
     await Promise.all(promises);
   }
 }
