@@ -20,6 +20,7 @@ async function fetch(matchIds: string[] | number[]) {
     json: true,
     resolveWithFullResponse: true,
     simple: false,
+    rejectUnauthorized: false,
   };
   log(url);
   for (let i = 0; i < RETRIES; i++) {
