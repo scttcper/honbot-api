@@ -14,7 +14,7 @@ async function fetch(matchIds: string[] | number[]) {
     throw new Error('Not Enough Matches');
   }
   const joined = matchIds.join('+');
-  const url = `https://api.heroesofnewerth.com/multi_match/all/matchids/${joined}/?token=${TOKEN}`;
+  const url = `http://api.heroesofnewerth.com/multi_match/all/matchids/${joined}/?token=${TOKEN}`;
   const options: request.RequestPromiseOptions = {
     gzip: true,
     json: true,
