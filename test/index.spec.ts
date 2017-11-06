@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import * as _ from 'lodash';
 
 import { setup } from '../models/setup';
