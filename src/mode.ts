@@ -1,3 +1,4 @@
+import * as semver from 'semver';
 /**
  * Gets match mode from info of match
  */
@@ -11,11 +12,21 @@ export function getMode(match: any): string {
   } else if (match.map === 'capturetheflag') {
     return 'Capture the Flag';
   } else if (match.setup_alt_pick + match.setup_nl + match.setup_officl === 3) {
+    let version = match.version;
+    // count the periods
+    const count = (version.match(/\./g) || []).length;
+    if (count > 2) {
+      // remove extra patch version
+      version = version.replace(/(\.[0-9]+)$/, '');
+    }
     // seasons
-    if (match.version > '4.1.0.0') {
+    if (semver.satisfies(version,  '>=4.3.0')) {
+      return 'Season 5';
+    }
+    if (semver.satisfies(version,  '>=4.1.0')) {
       return 'Season 3';
     }
-    if (match.version > '4.0.1.4') {
+    if (semver.satisfies(version,  '>=4.0.1')) {
       return 'Season 2';
     }
     // "4.0.0.1", "4.0.0.2", "4.0.0.3", "4.0.1.3", "4.0.1.4"
