@@ -19,8 +19,6 @@ export function getMode(match: any): string {
       // remove extra patch version
       version = version.replace(/(\.[0-9]+)$/, '');
     }
-    console.log(version);
-    console.log(semver.satisfies(version, '>=4.3.0'));
     // seasons
     if (semver.satisfies(version, '>=4.3.0')) {
       return 'Season 5';
