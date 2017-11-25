@@ -26,8 +26,8 @@
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "semver": "^5.4.1",
-    "sequelize": "^4.22.12",
-    "ts-trueskill": "^1.4.13"
+    "sequelize": "^4.22.15",
+    "ts-trueskill": "^1.4.14"
   },
   "devDependencies": {
     "@types/chai": "^4.0.5",
