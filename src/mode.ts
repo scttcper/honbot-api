@@ -20,13 +20,13 @@ export function getMode(match: any): string {
       version = version.replace(/(\.[0-9]+)$/, '');
     }
     // seasons
-    if (semver.satisfies(version,  '>=4.3.0')) {
+    if (semver.satisfies(version, '>=4.3.0')) {
       return 'Season 5';
     }
-    if (semver.satisfies(version,  '>=4.1.0')) {
+    if (semver.satisfies(version, '>=4.1.0')) {
       return 'Season 3';
     }
-    if (semver.satisfies(version,  '>=4.0.1')) {
+    if (semver.satisfies(version, '>=4.0.1')) {
       return 'Season 2';
     }
     // "4.0.0.1", "4.0.0.2", "4.0.0.3", "4.0.1.3", "4.0.1.4"
