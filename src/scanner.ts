@@ -33,7 +33,8 @@ async function findNewMatches() {
     if (minutes < 180) {
       await sleep(60000, 'matches too recent');
       if (notExit) {
-        return findNewMatches().catch((e) => catchError(e));
+        findNewMatches().catch((e) => catchError(e));
+        return
       }
     }
   }
@@ -43,7 +44,8 @@ async function findNewMatches() {
   await grabAndSave(matchIds, true);
   await sleep(3000, 'findNewMatches sleep');
   if (notExit) {
-    return findNewMatches().catch((e) => catchError(e));
+    findNewMatches().catch((e) => catchError(e));
+    return
   }
 }
 
@@ -65,7 +67,8 @@ async function findAllMissing() {
     await sleep(1800000, 'no missing found, reset cursor');
     cur = 0;
     if (notExit) {
-      return findAllMissing().catch((e) => catchError(e));
+      findAllMissing().catch((e) => catchError(e));
+      return;
     }
   }
   const missingIds = missing.map(x => x.toJSON().id);
@@ -74,7 +77,8 @@ async function findAllMissing() {
   cur = missingIds[missingIds.length - 1];
   await sleep(10000, 'findAllMissing sleeping');
   if (notExit) {
-    return findAllMissing().catch((e) => catchError(e));
+    findAllMissing().catch((e) => catchError(e));
+    return;
   }
 }
 
