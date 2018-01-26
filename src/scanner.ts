@@ -34,7 +34,7 @@ async function findNewMatches() {
       await sleep(60000, 'matches too recent');
       if (notExit) {
         findNewMatches().catch((e) => catchError(e));
-        return
+        return;
       }
     }
   }
@@ -45,7 +45,7 @@ async function findNewMatches() {
   await sleep(3000, 'findNewMatches sleep');
   if (notExit) {
     findNewMatches().catch((e) => catchError(e));
-    return
+    return;
   }
 }
 
