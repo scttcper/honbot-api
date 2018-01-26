@@ -93,6 +93,7 @@ process.on('SIGINT', () => {
 function catchError(err: Error) {
   log(err);
   sentry.captureException(err);
+  process.exit(0);
 }
 
 if (!module.parent) {
