@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as Raven from 'raven';
@@ -55,9 +56,9 @@ async function findAllMissing() {
   const missing = await Failed
     .findAll({
       where: {
-        id: { $gt: cur },
-        attempts: { $lt: 5 },
-        updatedAt: { $lt: hourAgo },
+        id: { [Op.gt]: cur },
+        attempts: { [Op.lt]: 5 },
+        updatedAt: { [Op.lt]: hourAgo },
       },
       limit: 25,
       order: [['id']],

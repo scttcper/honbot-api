@@ -1,5 +1,5 @@
+import { Op, literal } from 'sequelize';
 import * as _ from 'lodash';
-import * as Sequelize from 'sequelize';
 import { Rating, TrueSkill } from 'ts-trueskill';
 
 import { Trueskill } from '../models';
@@ -10,7 +10,7 @@ const ts = new TrueSkill(null, null, null, null, 0);
 export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const accountIds = players.map(n => n.account_id);
   const res = await Trueskill.findAll({
-    where: { account_id: { $in: accountIds } },
+    where: { account_id: { [Op.in]: accountIds } },
   }).then(n => n.map(x => x.toJSON()));
   // const found = current.map((n) => n.account_id);
   // const missing = _.difference(found, accountIds);
@@ -56,7 +56,7 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
       account_id: value,
       mu: flattenedResults[key].mu,
       sigma: flattenedResults[key].sigma,
-      games: Sequelize.literal('games + 1'),
+      games: literal('games + 1'),
     };
     if (flattendedTeamCreate[key]) {
       q.games = 1;
@@ -70,7 +70,7 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
 export async function matchSkill(players: PlayerAttributes[]) {
   const accountIds = players.map(n => n.account_id);
   const pls = await Trueskill.findAll({
-    where: { account_id: { $in: accountIds } },
+    where: { account_id: { [Op.in]: accountIds } },
   }).then(n => n.map(x => x.toJSON()));
   const teams = [[], []];
   for (const p of players) {

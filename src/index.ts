@@ -1,37 +1,76 @@
-import * as debug from 'debug';
-import * as kcors from 'kcors';
-import * as Koa from 'koa';
-import * as logger from 'koa-logger';
-import * as koaRaven from 'koa2-raven';
+import {
+  Request,
+  ResponseToolkit,
+  Server,
+  ServerOptions,
+  ServerRoute,
+  Plugin,
+} from 'hapi';
 import * as Raven from 'raven';
 
+import { serverRoutes } from './hapiroutes';
 import config from '../config';
-import mainRouter from './routes';
 
-const log = debug('honbot');
+const sentry = Raven
+  .config(config.dsn, { autoBreadcrumbs: true })
+  .install({ captureUnhandledRejections: true });
 
-const app = new Koa();
-app.proxy = true;
-if (config.dsn) {
-  const sentry = Raven
-    .config(config.dsn, { autoBreadcrumbs: true })
-    .install({ captureUnhandledRejections: true });
-  koaRaven(app, sentry);
-}
-app.use(logger());
-app.use(kcors());
-app.use((ctx, next) => {
-  ctx.type = 'json';
-  return next();
-});
+const options: ServerOptions = {
+  host: 'localhost',
+  port: config.port,
+  cache: [
+    {
+      name: 'redisCache',
+      engine: require('catbox-redis'),
+      host: '127.0.0.1',
+      partition: 'honbot',
+    },
+  ],
+};
 
-app
-  .use(mainRouter.routes())
-  .use(mainRouter.allowedMethods());
+const ravenPlugin: any = {
+  name: 'hapi-raven',
+  register: require('hapi-raven').register,
+  options: {
+    dsn: false,
+  },
+};
+
+const goodPlugin: any = {
+  plugin: require('good'),
+  options: {
+    ops: {
+      interval: 1000,
+    },
+    reporters: {
+      // TODO: silence console reporter for tests
+      myConsoleReporter: [
+        {
+          module: 'good-squeeze',
+          name: 'Squeeze',
+          args: [{ log: '*', response: '*' }],
+        },
+        {
+          module: 'good-console',
+        },
+        'stdout',
+      ],
+    },
+  },
+};
+
+export const server = new Server(options);
+
+export const register = server.register([ravenPlugin, goodPlugin]);
+server.route(serverRoutes);
 
 if (!module.parent) {
-  app.listen(config.port);
-  log(`http://localhost:${config.port}`);
+  register
+    .then(() => server.start())
+    .then()
+    .then((ser) => {
+      console.log('Server running at:', server.info.uri);
+      return server;
+    })
+    .catch(err => console.log(err));
 }
-
-export default app;

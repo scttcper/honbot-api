@@ -1,4 +1,4 @@
-import * as Sequelize from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import * as _ from 'lodash';
 import { subDays } from 'date-fns';
 
@@ -18,13 +18,13 @@ export async function playerCompetition(lowercaseNickname: string) {
     where: { lowercaseNickname },
     include: [{
       model: Matches,
-      where: { date: { $gt: oneWeekAgo } },
+      where: { date: { [Op.gt]: oneWeekAgo } },
       attributes: [],
     }],
     attributes: ['matchId'],
   }).then(n => n.map(x => x.toJSON().matchId));
   const players = await Players.findAll({
-    where: { matchId: { $in: ids } },
+    where: { matchId: { [Op.in]: ids } },
     attributes: ['matchId', 'nickname', 'lowercaseNickname', 'team', 'win'],
   }).then(n => n.map(x => x.toJSON()));
   const matches = _.groupBy(players, _.identity('matchId'));

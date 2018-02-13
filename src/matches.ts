@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as debug from 'debug';
 import * as _ from 'lodash';
 
@@ -201,7 +202,7 @@ export async function grabAndSave(
     log(`Parsed ${pids.length}`);
     await Matches.bulkCreate(parsed);
     await Players.bulkCreate(_.flatten(parsed.map(n => n.players)));
-    await Failed.destroy({ where: { id: { $in: pids }}});
+    await Failed.destroy({ where: { id: { [Op.in]: pids }}});
   }
   if (failed.length) {
     const promises = failed

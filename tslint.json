@@ -13,6 +13,7 @@
     "callable-types": false,
     "ordered-imports": false,
     "arrow-parens": false,
-    "no-var-requires": false
+    "no-var-requires": false,
+    "no-console": false
   }
 }

@@ -1,9 +1,9 @@
+import { Op } from 'sequelize';
 import * as _ from 'lodash';
 import { startOfDay, subDays } from 'date-fns';
 
 import { Heropick, Matches } from '../models';
 import { PlayerAttributes } from '../models/interfaces';
-import { client, getCache } from './redis';
 
 /**
  * Uses match date to update pick w/l for hero_id
@@ -12,7 +12,7 @@ export async function heroPick(players: PlayerAttributes[], day: Date): Promise<
   const date = startOfDay(new Date(day));
   const heroIds = players.map((n) => n.hero_id);
   const heroes = await Heropick
-    .findAll({ where: { hero_id: { $in: heroIds }, date } });
+    .findAll({ where: { hero_id: { [Op.in]: heroIds }, date } });
   return Promise.all(players.map((p) => {
     if (p.hero_id === 0) {
       return;
@@ -35,20 +35,16 @@ export async function heroPick(players: PlayerAttributes[], day: Date): Promise<
 }
 
 export async function heroStats() {
-  const cache = await getCache('herostats:cache');
-  if (cache) {
-    return JSON.parse(cache);
-  }
   const db: any = {};
   const startDay = startOfDay(new Date());
   const limit = subDays(startDay, 14);
   const yesterday = subDays(startDay, 1);
-  const date = { $gt: limit, $lt: yesterday };
+  const date = { [Op.gt]: limit, [Op.lt]: yesterday };
   const matches = await Matches
     .count({
       where: {
         date,
-        type: { $in: ['ranked', 'season'] },
+        type: { [Op.in]: ['ranked', 'season'] },
       },
     });
   const heroes = await Heropick
@@ -80,6 +76,5 @@ export async function heroStats() {
       return n;
     })
     .sort((a, b) => b.wr - a.wr);
-  client.setex('herostats:cache', 1200, JSON.stringify(res));
   return res;
 }
