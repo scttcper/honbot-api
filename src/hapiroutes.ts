@@ -84,7 +84,7 @@ const twitchStreamsRoute: ServerRoute = {
     tags: ['twitch'],
     cors: true,
     cache: {
-      expiresIn: 30 * 1000,
+      expiresIn: 60 * 5 * 1000,
     },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
@@ -96,7 +96,7 @@ const twitchStreamsRoute: ServerRoute = {
       return value;
     }
     const streams = await getTwitchStreams();
-    await twitchStreamsCache.set('latestMatches', streams, 3000, () => {});
+    await twitchStreamsCache.set('latestMatches', streams, 60 * 5 * 1000, () => {});
     return streams;
   },
 };
@@ -221,7 +221,7 @@ const latestMatchesRoute: ServerRoute = {
       order: [['id', 'DESC']],
       limit: 10,
     });
-    await latestMatchesCache.set('latestMatches', matches, 3000, () => {});
+    await latestMatchesCache.set('latestMatches', matches, 60 * 5 * 1000, () => {});
     return matches;
   },
 };
@@ -243,7 +243,7 @@ const statsRoute: ServerRoute = {
       return value;
     }
     const s = await stats();
-    await statsCache.set('stats', s, 3000, () => {});
+    await statsCache.set('stats', s, 60 * 15 * 1000, () => {});
     return s;
   },
 };
@@ -264,7 +264,7 @@ const herostatsRoute: ServerRoute = {
       return value;
     }
     const s = await heroStats();
-    await herostatsCache.set('herostats', s, 3000, () => {});
+    await herostatsCache.set('herostats', s, 60 * 60 * 1000, () => {});
     return s;
   },
 };
