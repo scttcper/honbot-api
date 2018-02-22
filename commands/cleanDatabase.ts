@@ -7,7 +7,7 @@ async function loop() {
   const query1 = {
     where: {
       createdAt: { [Op.lte]: old },
-      mode: { [Op.eq]: 'other' },
+      mode: { [Op.eq]: 'Unknown' },
     },
   };
   const unrankedDeleted = await Matches.count(query1);
