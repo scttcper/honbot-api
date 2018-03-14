@@ -5,7 +5,7 @@ import { Rating, TrueSkill } from 'ts-trueskill';
 import { Trueskill } from '../models';
 import { PlayerAttributes, TrueskillAttributes } from '../models/interfaces';
 
-const ts = new TrueSkill(null, null, null, null, 0);
+const ts = new TrueSkill(undefined, undefined, undefined, undefined, 0);
 
 export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const accountIds = players.map(n => n.account_id);
