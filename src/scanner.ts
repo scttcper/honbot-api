@@ -11,9 +11,10 @@ import sleep from './sleep';
 
 const log = debug('honbot');
 
-const sentry = Raven
-  .config(config.dsn, { autoBreadcrumbs: true })
-  .install({ captureUnhandledRejections: true });
+const sentry = Raven.config(config.dsn, {
+  autoBreadcrumbs: true,
+  captureUnhandledRejections: true,
+}).install();
 
 // const STARTING_MATCH_ID = 147503112;
 const STARTING_MATCH_ID = 149396730;
@@ -21,9 +22,11 @@ const BATCH_SIZE = 25;
 let notExit = true;
 
 async function findNewMatches() {
-  const [newestMatchId, newestMatchDate, diff] = await findNewest().catch((err) => {
-    sentry.captureException(err);
-  });
+  const [newestMatchId, newestMatchDate, diff] = await findNewest().catch(
+    err => {
+      sentry.captureException(err);
+    },
+  );
   if (diff > 25) {
     await sleep(60000, 'made no forward progress');
   }
@@ -34,7 +37,7 @@ async function findNewMatches() {
     if (minutes < 180) {
       await sleep(60000, 'matches too recent');
       if (notExit) {
-        findNewMatches().catch((e) => catchError(e));
+        findNewMatches().catch(e => catchError(e));
         return;
       }
     }
@@ -45,7 +48,7 @@ async function findNewMatches() {
   await grabAndSave(matchIds, true);
   await sleep(3000, 'findNewMatches sleep');
   if (notExit) {
-    findNewMatches().catch((e) => catchError(e));
+    findNewMatches().catch(e => catchError(e));
     return;
   }
 }
@@ -53,22 +56,21 @@ async function findNewMatches() {
 async function findAllMissing() {
   let cur = 0;
   const hourAgo = subHours(new Date(), 1);
-  const missing = await Failed
-    .findAll({
-      where: {
-        id: { [Op.gt]: cur },
-        attempts: { [Op.lt]: 5 },
-        updatedAt: { [Op.lt]: hourAgo },
-      },
-      limit: 25,
-      order: [['id']],
-    });
+  const missing = await Failed.findAll({
+    where: {
+      id: { [Op.gt]: cur },
+      attempts: { [Op.lt]: 5 },
+      updatedAt: { [Op.lt]: hourAgo },
+    },
+    limit: 25,
+    order: [['id']],
+  });
   if (!missing.length) {
     // wait 30 minutes
     await sleep(1800000, 'no missing found, reset cursor');
     cur = 0;
     if (notExit) {
-      findAllMissing().catch((e) => catchError(e));
+      findAllMissing().catch(e => catchError(e));
       return;
     }
   }
@@ -78,7 +80,7 @@ async function findAllMissing() {
   cur = missingIds[missingIds.length - 1];
   await sleep(10000, 'findAllMissing sleeping');
   if (notExit) {
-    findAllMissing().catch((e) => catchError(e));
+    findAllMissing().catch(e => catchError(e));
     return;
   }
 }
@@ -98,6 +100,6 @@ function catchError(err: Error) {
 }
 
 if (!module.parent) {
-  findNewMatches().catch((e) => catchError(e));
-  findAllMissing().catch((e) => catchError(e));
+  findNewMatches().catch(e => catchError(e));
+  findAllMissing().catch(e => catchError(e));
 }

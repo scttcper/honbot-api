@@ -11,9 +11,10 @@ import * as Raven from 'raven';
 import { serverRoutes } from './hapiroutes';
 import config from '../config';
 
-const sentry = Raven
-  .config(config.dsn, { autoBreadcrumbs: true })
-  .install({ captureUnhandledRejections: true });
+const sentry = Raven.config(config.dsn, {
+  autoBreadcrumbs: true,
+  captureUnhandledRejections: true,
+}).install();
 
 const options: ServerOptions = {
   host: 'localhost',
@@ -68,7 +69,7 @@ if (!module.parent) {
   register
     .then(() => server.start())
     .then()
-    .then((ser) => {
+    .then(ser => {
       console.log('Server running at:', server.info.uri);
       return server;
     })
