@@ -32,7 +32,7 @@
     "request-promise-native": "^1.0.5",
     "semver": "^5.5.0",
     "sequelize": "^4.36.1",
-    "ts-trueskill": "^2.0.0"
+    "ts-trueskill": "^2.0.1"
   },
   "devDependencies": {
     "@types/catbox": "^10.0.0",
