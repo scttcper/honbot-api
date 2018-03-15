@@ -33,7 +33,7 @@ const ravenPlugin: any = {
   name: 'hapi-raven',
   register: require('hapi-raven').register,
   options: {
-    dsn: false,
+    dsn: config.dsn,
   },
 };
 
