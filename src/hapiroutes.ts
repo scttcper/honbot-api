@@ -122,7 +122,7 @@ const matchRoute: ServerRoute = {
     const match = await Matches.findById(req.params.id, {
       include: [{ model: Players }],
     });
-    assert(match !== undefined, Boom.notFound('Match not found'));
+    assert(match !== null, Boom.notFound('Match not found'));
     return match;
   },
 };
@@ -162,7 +162,7 @@ const matchSkillRoute: ServerRoute = {
       where: query,
       include: [{ model: Players }],
     });
-    assert(match !== undefined, Boom.notFound('Match not found'));
+    assert(match !== null, Boom.notFound('Match not found'));
     const players: PlayerAttributes[] = match.get('players');
     assert(players.length > 1, Boom.notFound('Not enough players'));
     return matchSkill(players);
@@ -192,7 +192,7 @@ const playerSkillRoute: ServerRoute = {
   },
   handler: async (req: Request, h: ResponseToolkit) => {
     const skill = await Trueskill.findById(req.params.id, { raw: true });
-    assert(skill !== undefined, Boom.notFound('Skill not found'));
+    assert(skill !== null, Boom.notFound('Skill not found'));
     return skill;
   },
 };
