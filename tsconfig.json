@@ -8,10 +8,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "./build",
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "outDir": "./build"
   },
   "include": [
     "src/**/*",
