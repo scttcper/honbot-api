@@ -17,7 +17,7 @@ export async function heroPick(players: PlayerAttributes[], day: Date): Promise<
     if (p.hero_id === 0) {
       return;
     }
-    let inc = 'win';
+    let inc: 'win' | 'loss' = 'win';
     if (!p.win) {
       inc = 'loss';
     }
