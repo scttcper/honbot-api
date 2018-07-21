@@ -165,7 +165,7 @@ const matchSkillRoute: ServerRoute = {
     assert(match !== null, Boom.notFound('Match not found'));
     const players: PlayerAttributes[] = match.get('players');
     assert(players.length > 1, Boom.notFound('Not enough players'));
-    return matchSkill(players);
+    // return matchSkill(players);
   },
 };
 

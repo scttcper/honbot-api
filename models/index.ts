@@ -9,12 +9,16 @@ import {
   FailedAttributes,
 } from './interfaces';
 
-export const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  config.db,
-);
+export const sequelize = new Sequelize({
+  host: 'localhost',
+  dialect: 'postgres',
+  pool: {
+    max: 10,
+    min: 1,
+    idle: 1000,
+  },
+  logging: false,
+});
 
 type MatchInstance = Sequelize.Instance<MatchAttributes>;
 export const Matches = sequelize.define<MatchInstance, MatchAttributes>('matches', {
