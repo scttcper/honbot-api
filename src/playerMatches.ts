@@ -1,8 +1,10 @@
-import { Sequelize, Op } from 'sequelize';
-import * as _ from 'lodash';
 import { subDays } from 'date-fns';
+import * as _ from 'lodash';
+import { In } from 'typeorm';
 
-import { Players, Matches } from '../models';
+import { getConnection } from './db';
+import { Match } from './entity/Match';
+import { Player } from './entity/Player';
 
 function addCompetitor(obj, nickname, win) {
   const wl = win ? 'w' : 'l';
@@ -12,61 +14,66 @@ function addCompetitor(obj, nickname, win) {
   obj[nickname][wl] += 1;
   obj[nickname].t += 1;
 }
+
 export async function playerCompetition(lowercaseNickname: string) {
   const oneWeekAgo = subDays(new Date(), 7);
-  const ids = await Players.findAll({
-    where: { lowercaseNickname },
-    include: [{
-      model: Matches,
-      where: { date: { [Op.gt]: oneWeekAgo } },
-      attributes: [],
-    }],
-    attributes: ['matchId'],
-  }).then(n => n.map(x => x.toJSON().matchId));
-  const players = await Players.findAll({
-    where: { matchId: { [Op.in]: ids } },
-    attributes: ['matchId', 'nickname', 'lowercaseNickname', 'team', 'win'],
-  }).then(n => n.map(x => x.toJSON()));
-  const matches = _.groupBy(players, _.identity('matchId'));
+  const conn = await getConnection();
+  const matchIds = await conn
+    .createQueryBuilder()
+    .select(['match.id'])
+    .from(Player, 'players')
+    .innerJoin('players.match', 'match')
+    .where('players.lowercaseNickname = :lowercaseNickname', {
+      lowercaseNickname,
+    })
+    .andWhere('match.date > :oneWeekAgo', { oneWeekAgo })
+    .execute();
+  const ids: number[] = matchIds.map(n => n.match_id);
+  const matches = await conn.getRepository(Match).find({ id: In(ids) });
   const w: any = {};
   const a: any = {};
-  ids.map((m: any) => {
-    const p = matches[m];
-    const n = _.find(p, _.matchesProperty('lowercaseNickname', lowercaseNickname));
-    p.map((x) => {
+  ids.forEach(m => {
+    // other players in match
+    const p = _.find(matches, _.matchesProperty('id', m)).players;
+    // player itself
+    const n = _.find(
+      p,
+      _.matchesProperty('lowercaseNickname', lowercaseNickname),
+    );
+    p.forEach(x => {
       if (x.lowercaseNickname === n.lowercaseNickname) {
         return;
       }
-      addCompetitor(
-        x.team === n.team ? w : a,
-        x.nickname,
-        n.win,
-      );
+      addCompetitor(x.team === n.team ? w : a, x.nickname, n.win);
     });
   });
   const res = { with: [], against: [] };
+  // removes players with less than 2 co-matches and sorts
   res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   return res;
 }
 
 export async function playerMatches(lowercaseNickname: string) {
-  const matches = await Matches
-    .findAll({
-      include: [{
-        model: Players,
-        where: { lowercaseNickname },
-      }],
-      order: [['id', 'DESC']],
+  const conn = await getConnection();
+  const matches = await conn
+    .createQueryBuilder()
+    .select('match')
+    .from(Match, 'match')
+    .innerJoinAndSelect('match.players', 'players')
+    .where('players.lowercaseNickname = :lowercaseNickname', {
+      lowercaseNickname,
     })
-    .then((n) => n.map((x) => x.toJSON()));
+    .orderBy('match.id', 'DESC')
+    .getMany();
+
   const res: any = {
     wins: 0,
     losses: 0,
     matches: [],
     account_id: matches.length ? matches[0].players[0].account_id : 0,
   };
-  res.matches = matches.map((m) => {
+  res.matches = matches.map(m => {
     const n: any = m.players[0];
     res.wins += n.win ? 1 : 0;
     res.losses += n.win ? 0 : 1;

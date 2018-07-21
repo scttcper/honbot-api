@@ -1,9 +1,9 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class init1532062906189 implements MigrationInterface {
+export class init1532149846491 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.query(`CREATE TABLE "fails" ("id" integer NOT NULL, "attempts" integer NOT NULL, CONSTRAINT "PK_2062f73a4ab175152257c01b9aa" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "fails" ("id" integer NOT NULL, "attempts" integer NOT NULL, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_2062f73a4ab175152257c01b9aa" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "fails_attempts" ON "fails"("attempts") `);
         await queryRunner.query(`CREATE TABLE "heropicks" ("id" SERIAL NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "hero_id" integer NOT NULL, "loss" integer NOT NULL, "win" integer NOT NULL, CONSTRAINT "PK_506791fde247c5f93202bb85751" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "heropicks_date" ON "heropicks"("hero_id") `);

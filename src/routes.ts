@@ -1,23 +1,17 @@
-import {
-  Request,
-  ResponseToolkit,
-  Server,
-  ServerOptions,
-  ServerRoute,
-  Plugin,
-} from 'hapi';
-import * as Joi from 'joi';
-import { assert } from 'hoek';
 import * as Boom from 'boom';
-import { server } from './index';
+import { Request, ResponseToolkit, ServerRoute } from 'hapi';
+import { assert } from 'hoek';
+import * as Joi from 'joi';
 
-import { Players, Matches, Trueskill } from '../models';
-import { PlayerAttributes } from '../models/interfaces';
+import { getConnection } from './db';
+import { Match } from './entity/Match';
+import { Trueskill } from './entity/Trueskill';
 import { heroStats } from './heroes';
+import { server } from '.';
+import { playerCompetition, playerMatches } from './playerMatches';
 import { matchSkill } from './skill';
-import getTwitchStreams from './twitch';
-import { playerMatches, playerCompetition } from './playerMatches';
 import stats from './stats';
+import getTwitchStreams from './twitch';
 
 const playerMatchRoute: ServerRoute = {
   path: '/playerMatches/{nickname}',
@@ -89,7 +83,10 @@ const twitchStreamsRoute: ServerRoute = {
   },
   handler: async (req: Request, h: ResponseToolkit) => {
     if (!twitchStreamsCache) {
-      twitchStreamsCache = server.cache({ segment: 'twitchStreams', expiresIn: 60 * 5 * 1000 });
+      twitchStreamsCache = server.cache({
+        segment: 'twitchStreams',
+        expiresIn: 60 * 5 * 1000,
+      });
     }
     const value = await twitchStreamsCache.get('twitchStreams');
     if (value) {
@@ -119,9 +116,10 @@ const matchRoute: ServerRoute = {
     // },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
-    const match = await Matches.findById(req.params.id, {
-      include: [{ model: Players }],
-    });
+    const conn = await getConnection();
+    const match = await conn
+      .getRepository(Match)
+      .findOne({ id: Number(req.params.id) });
     assert(match !== null, Boom.notFound('Match not found'));
     return match;
   },
@@ -157,15 +155,12 @@ const matchSkillRoute: ServerRoute = {
     },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
-    const query = { id: req.params.id, setup_nl: 1, setup_officl: 1 };
-    const match = await Matches.findOne({
-      where: query,
-      include: [{ model: Players }],
-    });
+    const conn = await getConnection();
+    const query = { id: Number(req.params.id), setup_nl: 1, setup_officl: 1 };
+    const match = await conn.getRepository(Match).findOne(query);
     assert(match !== null, Boom.notFound('Match not found'));
-    const players: PlayerAttributes[] = match.get('players');
-    assert(players.length > 1, Boom.notFound('Not enough players'));
-    // return matchSkill(players);
+    assert(match.players.length > 1, Boom.notFound('Not enough players'));
+    return matchSkill(match.players);
   },
 };
 
@@ -191,7 +186,10 @@ const playerSkillRoute: ServerRoute = {
     },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
-    const skill = await Trueskill.findById(req.params.id, { raw: true });
+    const conn = await getConnection();
+    const skill = await conn
+      .getRepository(Trueskill)
+      .findOne(Number(req.params.id));
     assert(skill !== null, Boom.notFound('Skill not found'));
     return skill;
   },
@@ -210,17 +208,24 @@ const latestMatchesRoute: ServerRoute = {
   },
   handler: async (req: Request, h: ResponseToolkit) => {
     if (!latestMatchesCache) {
-      latestMatchesCache = server.cache({ segment: 'latestMatches', expiresIn: 60 * 5 * 1000 });
+      latestMatchesCache = server.cache({
+        segment: 'latestMatches',
+        expiresIn: 60 * 5 * 1000,
+      });
     }
     const value = await latestMatchesCache.get('latestMatches');
     if (value) {
       return value;
     }
-    const matches = await Matches.findAll({
-      include: [{ model: Players }],
-      order: [['id', 'DESC']],
-      limit: 10,
-    });
+    const conn = await getConnection();
+    const matches = await conn
+      .createQueryBuilder()
+      .select('match')
+      .from(Match, 'match')
+      .orderBy('match.id', 'DESC')
+      .innerJoinAndSelect('match.players', 'players')
+      .take(10)
+      .getMany();
     await latestMatchesCache.set('latestMatches', matches, 60 * 5 * 1000);
     return matches;
   },
@@ -236,7 +241,10 @@ const statsRoute: ServerRoute = {
   },
   handler: async (req: Request, h: ResponseToolkit) => {
     if (!statsCache) {
-      statsCache = server.cache({ segment: 'stats', expiresIn: 60 * 15 * 1000 });
+      statsCache = server.cache({
+        segment: 'stats',
+        expiresIn: 60 * 15 * 1000,
+      });
     }
     const value = await statsCache.get('stats');
     if (value) {
@@ -257,7 +265,10 @@ const herostatsRoute: ServerRoute = {
   },
   handler: async (req: Request, h: ResponseToolkit) => {
     if (!herostatsCache) {
-      herostatsCache = server.cache({ segment: 'herostats', expiresIn: 60 * 60 * 1000 });
+      herostatsCache = server.cache({
+        segment: 'herostats',
+        expiresIn: 60 * 60 * 1000,
+      });
     }
     const value = await herostatsCache.get('herostats');
     if (value) {

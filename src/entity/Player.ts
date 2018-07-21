@@ -4,6 +4,7 @@ import {
   Index,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import { Match } from './Match';
 
@@ -154,4 +155,7 @@ export class Player {
   @Index('players_match_id')
   @ManyToOne(type => Match, match => match.players)
   match: Match;
+
+  @RelationId((player: Player) => player.match)
+  matchId: number;
 }

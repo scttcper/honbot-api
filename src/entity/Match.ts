@@ -59,9 +59,12 @@ export class Match {
   @Column() setup_gated: number;
   @Column() setup_rapidfire: number;
 
-  @CreateDateColumn({ type: 'timestamptz' }) createdAt: Date;
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
 
-  @OneToMany(type => Player, player => player.match)
+  @OneToMany(type => Player, player => player.match, {
+    eager: true,
+  })
   @JoinTable()
   players: Player[];
 }

@@ -11,7 +11,9 @@ const ts = new TrueSkill(undefined, undefined, undefined, undefined, 0);
 export async function calculatePlayerSkill(players: Player[]) {
   const accountIds = players.map(n => n.account_id);
   const conn = await getConnection();
-  const res = await conn.getRepository(Trueskill).find({ account_id: In(accountIds) });
+  const res = await conn
+    .getRepository(Trueskill)
+    .find({ account_id: In(accountIds) });
   // const found = current.map((n) => n.account_id);
   // const missing = _.difference(found, accountIds);
   const teams = [[], []];
@@ -69,7 +71,9 @@ export async function calculatePlayerSkill(players: Player[]) {
 export async function matchSkill(players: Player[]) {
   const accountIds = players.map(n => n.account_id);
   const conn = await getConnection();
-  const pls = await conn.getRepository(Trueskill).find({ account_id: In(accountIds) });
+  const pls = await conn
+    .getRepository(Trueskill)
+    .find({ account_id: In(accountIds) });
   const teams = [[], []];
   for (const p of players) {
     const cur = pls.find(x => x.account_id === p.account_id);

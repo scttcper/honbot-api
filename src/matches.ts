@@ -1,15 +1,15 @@
 import * as debug from 'debug';
 import * as _ from 'lodash';
 
-import { Match } from './entity/Match';
+import { getConnection } from './db';
 import { Failed } from './entity/Failed';
+import { Match } from './entity/Match';
+import { Player } from './entity/Player';
 import fetch from './fetch';
 import { heroPick } from './heroes';
 import { getMode, getType } from './mode';
 import { calculatePlayerSkill } from './skill';
 import sleep from './sleep';
-import { getConnection } from './db';
-import { Player } from './entity/Player';
 
 const log = debug('honbot');
 const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];

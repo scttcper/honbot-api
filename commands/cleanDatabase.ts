@@ -1,52 +1,39 @@
-import { Matches, Failed, Heropick, Players } from '../models';
-import { subDays, subMonths } from 'date-fns';
-import { Op } from 'sequelize';
+import { subDays } from 'date-fns';
+
+import { getConnection } from '../src/db';
+import { Failed } from '../src/entity/Failed';
+import { Heropick } from '../src/entity/Heropick';
+import { Match } from '../src/entity/Match';
 
 async function loop() {
   const old = subDays(new Date(), 120);
-  const query1 = {
-    where: {
-      createdAt: { [Op.lte]: old },
-      mode: { [Op.eq]: 'Unknown' },
-    },
-  };
-  const unrankedDeleted = await Matches.count(query1);
-  console.log('unranked', unrankedDeleted);
-  if (unrankedDeleted > 0) {
-    await Matches.destroy(query1);
+  const conn = await getConnection();
+  const unrankedDeleted = await conn.createQueryBuilder()
+    .select('match.id').from(Match, 'match')
+    .where('match.createdAt <= :old', { old })
+    .andWhere('match.mode = :mode', { mode: 'Unknown' })
+    .getMany();
+  console.log('unranked', unrankedDeleted.length);
+  if (unrankedDeleted.length > 0) {
+    await conn.getRepository(Match).remove(unrankedDeleted);
   }
 
-  const query4 = {
-    where: {
-      matchId: { [Op.eq]: null },
-    },
-  };
-  const playersDeleted = await Players.count(query4);
-  console.log('playersDeleted', playersDeleted);
-  if (playersDeleted > 0) {
-    await Players.destroy(query4);
+  const failedDeleted = await conn.createQueryBuilder()
+    .select('failed.id').from(Failed, 'failed')
+    .where('failed.createdAt <= :old', { old })
+    .getMany();
+  console.log('failedDeleted', failedDeleted.length);
+  if (failedDeleted.length > 0) {
+    await conn.getRepository(Failed).remove(failedDeleted);
   }
 
-  const month = subMonths(new Date(), 3);
-  const query2 = {
-    where: {
-      createdAt: { [Op.lte]: old },
-    },
-  };
-  const failedDeleted = await Failed.count(query2);
-  console.log('failedDeleted', failedDeleted);
-  if (failedDeleted > 0) {
-    await Failed.destroy(query2);
-  }
-  const query3 = {
-    where: {
-      date: { [Op.lte]: old },
-    },
-  };
-  const pickDeleted = await Heropick.count(query3);
-  console.log('Heropick', pickDeleted);
-  if (failedDeleted > 0) {
-    await Heropick.destroy(query3);
+  const pickDeleted = await conn.createQueryBuilder()
+    .select('heropick.id').from(Heropick, 'heropick')
+    .where('heropick.date <= :old', { old })
+    .getMany();
+  console.log('Heropick', pickDeleted.length);
+  if (pickDeleted.length > 0) {
+    await conn.getRepository(Heropick).remove(pickDeleted);
   }
 }
 
