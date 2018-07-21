@@ -1,8 +1,8 @@
 {
   "name": "honbot-api",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "author": "Scott Cooper <scttcper@gmail.com>",
-  "main": "src/index.ts",
+  "private": true,
   "scripts": {
     "typeorm": "typeorm",
     "makemigrations": "ts-node ./node_modules/.bin/typeorm migration:generate",
