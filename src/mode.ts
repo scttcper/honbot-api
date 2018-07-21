@@ -20,6 +20,9 @@ export function getMode(match: any): string {
       version = version.replace(/(\.[0-9]+)$/, '');
     }
     // seasons
+    if (semver.satisfies(version, '>=4.5.0')) {
+      return 'Season 7';
+    }
     if (semver.satisfies(version, '>=4.4.0')) {
       return 'Season 6';
     }
