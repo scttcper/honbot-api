@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as Raven from 'raven';
