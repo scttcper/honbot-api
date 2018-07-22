@@ -1,15 +1,8 @@
-import {
-  Request,
-  ResponseToolkit,
-  Server,
-  ServerOptions,
-  ServerRoute,
-  Plugin,
-} from 'hapi';
+import { Server, ServerOptions } from 'hapi';
 import * as Raven from 'raven';
 
-import { serverRoutes } from './hapiroutes';
 import config from '../config';
+import { serverRoutes } from './routes';
 
 const sentry = Raven.config(config.dsn, {
   autoBreadcrumbs: true,
@@ -31,7 +24,7 @@ const options: ServerOptions = {
 
 const ravenPlugin: any = {
   name: 'hapi-raven',
-  register: require('hapi-raven').register,
+  plugin: require('hapi-raven'),
   options: {
     dsn: config.dsn,
   },

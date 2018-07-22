@@ -5,7 +5,7 @@
     "module":"commonjs",
     "lib": ["es2017"],
     "sourceMap": true,
-    "declaration": true,
+    "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "./build"
@@ -14,6 +14,7 @@
     "src/**/*",
     "models/**/*",
     "config/**/*",
-    "commands/**/*"
+    "commands/**/*",
+    "test/**/*"
   ]
 }

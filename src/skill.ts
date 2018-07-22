@@ -1,17 +1,19 @@
-import { Op, literal } from 'sequelize';
 import * as _ from 'lodash';
 import { Rating, TrueSkill } from 'ts-trueskill';
+import { In } from 'typeorm';
 
-import { Trueskill } from '../models';
-import { PlayerAttributes, TrueskillAttributes } from '../models/interfaces';
+import { Trueskill } from './entity/Trueskill';
+import { Player } from './entity/Player';
+import { getConnection } from './db';
 
 const ts = new TrueSkill(undefined, undefined, undefined, undefined, 0);
 
-export async function calculatePlayerSkill(players: PlayerAttributes[]) {
+export async function calculatePlayerSkill(players: Player[]) {
   const accountIds = players.map(n => n.account_id);
-  const res = await Trueskill.findAll({
-    where: { account_id: { [Op.in]: accountIds } },
-  }).then(n => n.map(x => x.toJSON()));
+  const conn = await getConnection();
+  const res = await conn
+    .getRepository(Trueskill)
+    .find({ account_id: In(accountIds) });
   // const found = current.map((n) => n.account_id);
   // const missing = _.difference(found, accountIds);
   const teams = [[], []];
@@ -19,10 +21,7 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const teamCreate: boolean[][] = [[], []];
   const teamWin = [0, 0];
   for (const p of players) {
-    const cur: TrueskillAttributes = _.find(
-      res,
-      _.matchesProperty('account_id', p.account_id),
-    );
+    const cur = res.find(x => x.account_id === p.account_id);
     let r: Rating;
     let create: boolean;
     if (cur) {
@@ -50,34 +49,34 @@ export async function calculatePlayerSkill(players: PlayerAttributes[]) {
   const flattenedResults = _.flatten(result);
   const flattendedTeamIds = _.flatten(teamIds);
   const flattendedTeamCreate = _.flatten(teamCreate);
-  const updates = [];
-  _.forEach(flattendedTeamIds, (value, key) => {
-    const q: any = {
-      account_id: value,
-      mu: flattenedResults[key].mu,
-      sigma: flattenedResults[key].sigma,
-      games: literal('games + 1'),
-    };
+  const updates = flattendedTeamIds.map((value, key) => {
     if (flattendedTeamCreate[key]) {
-      q.games = 1;
-      return updates.push(Trueskill.create(q, { returning: false }));
+      const tsn = new Trueskill();
+      tsn.account_id = value;
+      tsn.mu = flattenedResults[key].mu;
+      tsn.sigma = flattenedResults[key].sigma;
+      tsn.games = 1;
+      return conn.getRepository(Trueskill).insert(tsn);
     }
-    return updates.push(Trueskill.update(q, { where: { account_id: value } }));
+    const cur = res.find(x => x.account_id === value);
+    cur.account_id = value;
+    cur.mu = flattenedResults[key].mu;
+    cur.sigma = flattenedResults[key].sigma;
+    cur.games += 1;
+    return conn.getRepository(Trueskill).update(value, cur);
   });
   return Promise.all(updates);
 }
 
-export async function matchSkill(players: PlayerAttributes[]) {
+export async function matchSkill(players: Player[]) {
   const accountIds = players.map(n => n.account_id);
-  const pls = await Trueskill.findAll({
-    where: { account_id: { [Op.in]: accountIds } },
-  }).then(n => n.map(x => x.toJSON()));
+  const conn = await getConnection();
+  const pls = await conn
+    .getRepository(Trueskill)
+    .find({ account_id: In(accountIds) });
   const teams = [[], []];
   for (const p of players) {
-    const cur: TrueskillAttributes = _.find(
-      pls,
-      _.matchesProperty('account_id', p.account_id),
-    );
+    const cur = pls.find(x => x.account_id === p.account_id);
     const r = new Rating(cur.mu, cur.sigma);
     teams[p.team - 1].push(r);
   }

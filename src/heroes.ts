@@ -1,18 +1,20 @@
-import { Op } from 'sequelize';
-import * as _ from 'lodash';
 import { startOfDay, subDays } from 'date-fns';
+import * as _ from 'lodash';
+import { In } from 'typeorm';
 
-import { Heropick, Matches } from '../models';
-import { PlayerAttributes } from '../models/interfaces';
+import { getConnection } from './db';
+import { Heropick } from './entity/Heropick';
+import { Match } from './entity/Match';
+import { Player } from './entity/Player';
 
 /**
  * Uses match date to update pick w/l for hero_id
  */
-export async function heroPick(players: PlayerAttributes[], day: Date): Promise<any> {
+export async function heroPick(players: Player[], day: Date): Promise<any> {
   const date = startOfDay(new Date(day));
   const heroIds = players.map((n) => n.hero_id);
-  const heroes = await Heropick
-    .findAll({ where: { hero_id: { [Op.in]: heroIds }, date } });
+  const conn = await getConnection();
+  const heroes = await conn.getRepository(Heropick).find({ id: In(heroIds), date });
   return Promise.all(players.map((p) => {
     if (p.hero_id === 0) {
       return;
@@ -21,41 +23,35 @@ export async function heroPick(players: PlayerAttributes[], day: Date): Promise<
     if (!p.win) {
       inc = 'loss';
     }
-    const hero = _.find(heroes, (h) => h.get('hero_id') === p.hero_id);
+    const hero = heroes.find((h) => h.hero_id === p.hero_id);
     if (hero) {
-      return hero.increment(inc);
+      return conn.getRepository(Heropick).increment(hero, inc, 1);
     }
-    return Heropick
-      .create({ date, hero_id: p.hero_id }, { returning: false })
-      .catch((err) => {
-        return Heropick.findOne({ where: { hero_id: p.hero_id, date }})
-          .then(h => h.increment(inc));
-      });
+    const nh = new Heropick();
+    nh.hero_id = p.hero_id;
+    nh.date = date;
+    return conn.manager.save(nh).catch(() => {
+      return conn.getRepository(Heropick).increment(nh, inc, 1);
+    });
   }));
 }
 
 export async function heroStats() {
-  const db: any = {};
   const startDay = startOfDay(new Date());
   const limit = subDays(startDay, 14);
   const yesterday = subDays(startDay, 1);
-  const date = { [Op.gt]: limit, [Op.lt]: yesterday };
-  const matches = await Matches
-    .count({
-      where: {
-        date,
-        type: { [Op.in]: ['ranked', 'season'] },
-      },
-    });
-  const heroes = await Heropick
-    .findAll({
-      where: { date },
-      order: [['date', 'DESC']],
-    })
-    .then(n => n.map(k => k.toJSON()));
+  const conn = await getConnection();
+  const matches = await conn.createQueryBuilder().select('match').from(Match, 'match')
+    .where('match.date BETWEEN :min AND :max', { min: limit, max: yesterday })
+    .andWhere('match.type IN (:...types)', { types: ['ranked', 'season'] })
+    .getCount();
+  const heroes = await conn.createQueryBuilder().select('heropick').from(Heropick, 'heropick')
+    .where('heropick.date BETWEEN :min AND :max', { min: limit, max: yesterday })
+    .orderBy('heropick.date', 'DESC')
+    .getMany();
   const res = { avg: {}, week: {} };
   const avgCalc = {};
-  heroes.map((n: any) => {
+  heroes.forEach((n: any) => {
     if (!avgCalc[n.hero_id]) {
       avgCalc[n.hero_id] = { hero_id: n.hero_id, win: 0, loss: 0 };
     }

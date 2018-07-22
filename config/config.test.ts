@@ -1,16 +1,16 @@
+import * as path from 'path';
+
 module.exports = {
-  username: '',
-  database: 'hontest',
-  password: '',
   db: {
+    type: 'postgres',
     host: 'localhost',
-    dialect: 'postgres',
-    pool: {
-      max: 10,
-      min: 1,
-      idle: 1000,
-    },
+    port: 5432,
+    username: '',
+    password: '',
+    database: 'hontestdb',
+    entities: [path.join(__dirname, '../src/entity/*.ts')],
     logging: false,
+    synchronize: true,
   },
   token: 'test',
   port: 5000,

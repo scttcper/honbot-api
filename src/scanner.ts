@@ -1,13 +1,13 @@
-import { Op } from 'sequelize';
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as Raven from 'raven';
 import { differenceInMinutes, subHours } from 'date-fns';
 
-import { Failed } from '../models';
 import config from '../config';
 import { findNewest, grabAndSave } from './matches';
 import sleep from './sleep';
+import { Failed } from './entity/Failed';
+import { getConnection } from './db';
 
 const log = debug('honbot');
 
@@ -16,7 +16,6 @@ const sentry = Raven.config(config.dsn, {
   captureUnhandledRejections: true,
 }).install();
 
-// const STARTING_MATCH_ID = 147503112;
 const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
 let notExit = true;
@@ -56,15 +55,14 @@ async function findNewMatches() {
 async function findAllMissing() {
   let cur = 0;
   const hourAgo = subHours(new Date(), 1);
-  const missing = await Failed.findAll({
-    where: {
-      id: { [Op.gt]: cur },
-      attempts: { [Op.lt]: 5 },
-      updatedAt: { [Op.lt]: hourAgo },
-    },
-    limit: 25,
-    order: [['id']],
-  });
+  const conn = await getConnection();
+  const missing = await conn.createQueryBuilder().select('failed').from(Failed, 'failed')
+    .where('failed.id > :cur', { cur })
+    .andWhere('failed.attempts < 5')
+    .andWhere('failed.updatedAt < :hourAgo', { hourAgo })
+    .limit(25)
+    .orderBy('failed.id')
+    .getMany();
   if (!missing.length) {
     // wait 30 minutes
     await sleep(1800000, 'no missing found, reset cursor');
@@ -74,7 +72,7 @@ async function findAllMissing() {
       return;
     }
   }
-  const missingIds = missing.map(x => x.toJSON().id);
+  const missingIds = missing.map(x => x.id);
   log('Attempting old matches!');
   await grabAndSave(missingIds, false);
   cur = missingIds[missingIds.length - 1];
