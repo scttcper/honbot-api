@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import * as debug from 'debug';
 import * as _ from 'lodash';
 import * as Raven from 'raven';
@@ -22,11 +21,7 @@ const BATCH_SIZE = 25;
 let notExit = true;
 
 async function findNewMatches() {
-  const [newestMatchId, newestMatchDate, diff] = await findNewest().catch(
-    err => {
-      sentry.captureException(err);
-    },
-  );
+  const [newestMatchId, newestMatchDate, diff] = await findNewest();
   if (diff > 25) {
     await sleep(60000, 'made no forward progress');
   }

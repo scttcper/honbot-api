@@ -16,17 +16,19 @@ const ITEM_SLOTS = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6'];
 
 export async function findNewest(): Promise<any> {
   const conn = await getConnection();
-  const match = await conn
-    .getRepository(Match)
-    .findOne({ order: { id: 'DESC' } });
-  const failed = await conn
-    .getRepository(Failed)
-    .findOne({ order: { id: 'DESC' } });
+  const match = await conn.createQueryBuilder().select('matches').from(Match, 'matches')
+    .orderBy('matches.id', 'DESC')
+    .limit(1)
+    .getOne();
+  const failed = await conn.createQueryBuilder().select('failed').from(Failed, 'failed')
+    .orderBy('failed.id', 'DESC')
+    .limit(1)
+    .getOne();
   if (!match && !failed) {
     return [undefined, undefined, 0];
   }
-  const m = Number(match.id || 0);
-  const f = Number(failed.id || 0);
+  const m = match ? match.id : 0;
+  const f = failed ? failed.id : 0;
   if (m > f) {
     return [match.id, match.date, f - m];
   }

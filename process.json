@@ -2,7 +2,7 @@
   "apps" : [
     {
       "name"        : "hb",
-      "script"      : "build/src/index.js",
+      "script"      : "./src/index.ts",
       "kill_timeout": 3000,
       "env": {
         "NODE_ENV": "prod",
@@ -11,7 +11,7 @@
     },
     {
       "name"        : "hbscan",
-      "script"      : "build/src/scanner.js",
+      "script"      : "./src/scanner.ts",
       "kill_timeout": 3000,
       "env": {
         "NODE_ENV": "prod",

@@ -1,21 +1,17 @@
+import { startOfDay, subDays } from 'date-fns';
 import * as _ from 'lodash';
 
 import { flushdb, getConnection } from '../src/db';
-import { multimatch } from './data/multimatch';
-import { parseMultimatch } from '../src/matches';
+import { Failed } from '../src/entity/Failed';
 import { Match } from '../src/entity/Match';
 import { Player } from '../src/entity/Player';
-import { Failed } from '../src/entity/Failed';
-import { startOfDay, subDays } from 'date-fns';
-import { In, LessThan, MoreThan } from 'typeorm';
+import { parseMultimatch, findNewest } from '../src/matches';
+import { multimatch } from './data/multimatch';
 
-describe('dbinit', function() {
-  it('should setup database', async function() {
+describe('honbot', function() {
+  before('should setup database', async function() {
     await flushdb();
   });
-});
-
-describe('multimatch', function() {
   it('should load multimatch', async function() {
     const matchIds = multimatch[0].map(n => n.match_id);
     const [matches, players, failed] = await parseMultimatch(
@@ -44,11 +40,7 @@ describe('multimatch', function() {
     const startDay = startOfDay(new Date());
     const limit = subDays('2012-01-01', 14);
     const yesterday = subDays(startDay, 1);
-    // const zzz = await conn.getRepository(Match).find({
-    //   date: [MoreThan(limit), LessThan(yesterday)],
-    //   type: In(['ranked', 'season']),
-    // });
-    const zzz = await conn
+    await conn
       .createQueryBuilder()
       .select('match')
       .from(Match, 'match')
@@ -56,7 +48,8 @@ describe('multimatch', function() {
       .andWhere('match.type IN (:...types)', { types: ['ranked', 'season'] })
       .leftJoinAndSelect('match.players', 'players')
       .getMany();
-
-    console.log(zzz[0]);
+  });
+  it('should find newest', async function() {
+    const [newestMatchId, newestMatchDate, diff] = await findNewest();
   });
 });

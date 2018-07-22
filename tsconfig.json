@@ -14,7 +14,6 @@
     "src/**/*",
     "models/**/*",
     "config/**/*",
-    "commands/**/*",
-    "test/**/*"
+    "commands/**/*"
   ]
 }

@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Server, ServerOptions } from 'hapi';
 import * as Raven from 'raven';
 
