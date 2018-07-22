@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "es2017",
+    "target": "es6",
     "module":"commonjs",
-    "lib": ["es2017"],
+    "lib": ["es2015"],
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
