@@ -120,7 +120,7 @@ const matchRoute: ServerRoute = {
     const match = await conn
       .getRepository(Match)
       .findOne({ id: Number(req.params.id) });
-    assert(match !== null, Boom.notFound('Match not found'));
+    assert(!!match, Boom.notFound('Match not found'));
     return match;
   },
 };
@@ -158,7 +158,7 @@ const matchSkillRoute: ServerRoute = {
     const conn = await getConnection();
     const query = { id: Number(req.params.id), setup_nl: 1, setup_officl: 1 };
     const match = await conn.getRepository(Match).findOne(query);
-    assert(match !== null, Boom.notFound('Match not found'));
+    assert(!!match, Boom.notFound('Match not found'));
     assert(match.players.length > 1, Boom.notFound('Not enough players'));
     return matchSkill(match.players);
   },
@@ -191,6 +191,7 @@ const playerSkillRoute: ServerRoute = {
       .getRepository(Trueskill)
       .findOne(Number(req.params.id));
     assert(skill !== null, Boom.notFound('Skill not found'));
+    assert(!!skill, Boom.notFound('Skill not found'));
     return skill;
   },
 };
