@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "es6",
+    "target": "es2017",
     "module":"commonjs",
-    "lib": ["es6"],
-    "sourceMap": true,
+    "lib": ["es2017"],
+    "inlineSourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

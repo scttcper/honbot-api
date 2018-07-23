@@ -1,4 +1,5 @@
 import { subDays } from 'date-fns';
+import { In } from 'typeorm';
 
 import { getConnection } from '../src/db';
 import { Failed } from '../src/entity/Failed';
@@ -18,13 +19,18 @@ async function loop() {
     await conn.getRepository(Match).remove(unrankedDeleted);
   }
 
-  const failedDeleted = await conn.createQueryBuilder()
+  const failedDeletedRes = await conn.createQueryBuilder()
     .select('failed.id').from(Failed, 'failed')
     .where('failed.createdAt <= :old', { old })
     .getMany();
+  const failedDeleted = failedDeletedRes.map(n => n.id);
   console.log('failedDeleted', failedDeleted.length);
   if (failedDeleted.length > 0) {
-    await conn.getRepository(Failed).remove(failedDeleted);
+    await conn.createQueryBuilder()
+      .delete()
+      .from(Failed)
+      .where('id IN (:ids)', { ids: failedDeleted })
+      .execute();
   }
 
   const pickDeleted = await conn.createQueryBuilder()
