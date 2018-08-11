@@ -23,13 +23,13 @@ async function loop() {
     .select('failed.id').from(Failed, 'failed')
     .where('failed.createdAt <= :old', { old })
     .getMany();
-  const failedDeleted = failedDeletedRes.map(n => n.id);
+  const failedDeleted = failedDeletedRes.map(n => Number(n.id));
   console.log('failedDeleted', failedDeleted.length);
   if (failedDeleted.length > 0) {
     await conn.createQueryBuilder()
       .delete()
       .from(Failed)
-      .where('id IN (:ids)', { ids: failedDeleted })
+      .where('id IN (:...ids)', { ids: failedDeleted })
       .execute();
   }
 

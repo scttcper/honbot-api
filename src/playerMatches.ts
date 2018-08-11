@@ -29,6 +29,12 @@ export async function playerCompetition(lowercaseNickname: string) {
     .andWhere('match.date > :oneWeekAgo', { oneWeekAgo })
     .execute();
   const ids: number[] = matchIds.map(n => n.match_id);
+  if (ids.length === 0) {
+    return {
+      with: [],
+      against: [],
+    };
+  }
   const matches = await conn.getRepository(Match).find({ id: In(ids) });
   const w: any = {};
   const a: any = {};
