@@ -16,7 +16,7 @@ function addCompetitor(obj, nickname, win) {
 }
 
 export async function playerCompetition(lowercaseNickname: string) {
-  const oneWeekAgo = subDays(new Date(), 7);
+  const timeAgo = subDays(new Date(), 30);
   const conn = await getConnection();
   const matchIds = await conn
     .createQueryBuilder()
@@ -26,7 +26,7 @@ export async function playerCompetition(lowercaseNickname: string) {
     .where('players.lowercaseNickname = :lowercaseNickname', {
       lowercaseNickname,
     })
-    .andWhere('match.date > :oneWeekAgo', { oneWeekAgo })
+    .andWhere('match.date > :timeAgo', { timeAgo })
     .execute();
   const ids: number[] = matchIds.map(n => n.match_id);
   if (ids.length === 0) {
