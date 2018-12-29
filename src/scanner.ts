@@ -23,14 +23,14 @@ let notExit = true;
 async function findNewMatches() {
   const [newestMatchId, newestMatchDate, diff] = await findNewest();
   if (diff > 25) {
-    await sleep(60000, 'made no forward progress');
+    await sleep(1800000, 'made no forward progress');
   }
   if (newestMatchId) {
     const minutes = differenceInMinutes(new Date(), new Date(newestMatchDate));
     const hours = Math.round(minutes / 60);
     log(`Newest: ${newestMatchId} - Age: ${hours} hours`);
     if (minutes < 180) {
-      await sleep(60000, 'matches too recent');
+      await sleep(1800000, 'matches too recent');
       if (notExit) {
         findNewMatches().catch(e => catchError(e));
         return;
@@ -61,7 +61,7 @@ async function findAllMissing() {
     .getMany();
   if (!missing.length) {
     // wait 30 minutes
-    await sleep(1800000, 'no missing found, reset cursor');
+    await sleep(3600000, 'no missing found, reset cursor');
     cur = 0;
     if (notExit) {
       findAllMissing().catch(e => catchError(e));
