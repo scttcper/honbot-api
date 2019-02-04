@@ -12,6 +12,7 @@ import { playerCompetition, playerMatches } from './playerMatches';
 import { matchSkill } from './skill';
 import stats from './stats';
 import getTwitchStreams from './twitch';
+import { getCache, client } from './redis';
 
 const playerMatchRoute: ServerRoute = {
   path: '/playerMatches/{nickname}',
@@ -70,7 +71,6 @@ const playerCompetitionRoute: ServerRoute = {
   },
 };
 
-let twitchStreamsCache;
 const twitchStreamsRoute: ServerRoute = {
   path: '/twitchStreams',
   method: 'GET',
@@ -82,18 +82,7 @@ const twitchStreamsRoute: ServerRoute = {
     },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
-    if (!twitchStreamsCache) {
-      twitchStreamsCache = server.cache({
-        segment: 'twitchStreams',
-        expiresIn: 60 * 5 * 1000,
-      });
-    }
-    const value = await twitchStreamsCache.get('twitchStreams');
-    if (value) {
-      return value;
-    }
     const streams = await getTwitchStreams();
-    await twitchStreamsCache.set('latestMatches', streams, 60 * 5 * 1000);
     return streams;
   },
 };
@@ -196,7 +185,6 @@ const playerSkillRoute: ServerRoute = {
   },
 };
 
-let latestMatchesCache;
 const latestMatchesRoute: ServerRoute = {
   path: '/latestMatches',
   method: 'GET',
@@ -208,15 +196,9 @@ const latestMatchesRoute: ServerRoute = {
     // },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
-    if (!latestMatchesCache) {
-      latestMatchesCache = server.cache({
-        segment: 'latestMatches',
-        expiresIn: 60 * 5 * 1000,
-      });
-    }
-    const value = await latestMatchesCache.get('latestMatches');
-    if (value) {
-      return value;
+    const cache = await getCache('latestMatches');
+    if (cache) {
+      return JSON.parse(cache);
     }
     const conn = await getConnection();
     const matches = await conn
@@ -227,7 +209,7 @@ const latestMatchesRoute: ServerRoute = {
       .innerJoinAndSelect('match.players', 'players')
       .take(10)
       .getMany();
-    await latestMatchesCache.set('latestMatches', matches, 60 * 5 * 1000);
+    client.setex('twitch:cache', 60 * 5 * 1000, JSON.stringify(matches));
     return matches;
   },
 };

@@ -12,14 +12,6 @@ const sentry = Raven.config(config.dsn, {
 const options: ServerOptions = {
   host: 'localhost',
   port: config.port,
-  cache: [
-    {
-      name: 'redisCache',
-      engine: require('catbox-redis'),
-      host: '127.0.0.1',
-      partition: 'honbot',
-    },
-  ],
 };
 
 const ravenPlugin: any = {
