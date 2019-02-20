@@ -209,7 +209,7 @@ const latestMatchesRoute: ServerRoute = {
       .innerJoinAndSelect('match.players', 'players')
       .take(10)
       .getMany();
-    client.setex('latestMatches', 60 * 5 * 1000, JSON.stringify(matches));
+    client.setex('latestMatches', 1000, JSON.stringify(matches));
     return matches;
   },
 };
