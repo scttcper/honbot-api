@@ -66,7 +66,6 @@ export async function playerMatches(lowercaseNickname: string) {
     .createQueryBuilder()
     .select('match')
     .from(Match, 'match')
-    .innerJoinAndSelect('match.players', 'players')
     .where('players.lowercaseNickname = :lowercaseNickname', {
       lowercaseNickname,
     })
