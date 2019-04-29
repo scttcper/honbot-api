@@ -206,6 +206,7 @@ const latestMatchesRoute: ServerRoute = {
       .select('match')
       .from(Match, 'match')
       .orderBy('match.id', 'DESC')
+      .innerJoinAndSelect('match.players', 'players')
       .take(10)
       .getMany();
     client.setex('latestMatches', 1000, JSON.stringify(matches));
