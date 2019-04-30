@@ -205,6 +205,8 @@ const latestMatchesRoute: ServerRoute = {
       .createQueryBuilder()
       .select('match')
       .from(Match, 'match')
+      .innerJoinAndSelect('match.players', 'players')
+      .limit(100)
       .orderBy('match.id', 'DESC')
       .take(10)
       .getMany();
