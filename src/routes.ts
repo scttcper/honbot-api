@@ -201,14 +201,22 @@ const latestMatchesRoute: ServerRoute = {
       return JSON.parse(cache);
     }
     const conn = await getConnection();
+    const matchResults = await conn
+      .createQueryBuilder()
+      .select('match.id')
+      .from(Match, 'match')
+      .orderBy('match.id', 'DESC')
+      .limit(10)
+      .getMany();
+
+    const matchIds = matchResults.map(n => n.id);
+
     const matches = await conn
       .createQueryBuilder()
       .select('match')
       .from(Match, 'match')
       .innerJoinAndSelect('match.players', 'players')
-      .limit(100)
-      .orderBy('match.id', 'DESC')
-      .take(10)
+      .whereInIds(matchIds)
       .getMany();
     client.setex('latestMatches', 1000, JSON.stringify(matches));
     return matches;
