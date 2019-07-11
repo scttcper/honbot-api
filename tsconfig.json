@@ -1,14 +1,19 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
+    "lib": ["es2018"],
     "target": "es2017",
-    "module":"commonjs",
-    "lib": ["es2017"],
-    "inlineSourceMap": true,
-    "declaration": false,
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSources": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "./build"
+    "outDir": "dist"
   },
   "include": [
     "src/**/*",

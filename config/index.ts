@@ -1,5 +1,5 @@
-import * as path from 'path';
-import * as debug from 'debug';
+import path from 'path';
+import debug from 'debug';
 
 const log = debug('honbot');
 const env = process.env.NODE_ENV || 'test';
@@ -24,6 +24,7 @@ let config = {
 
 const filename = `./config.${env}`;
 log(`Using: ${filename}`);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const imported = require(filename);
 config = { ...config, ...imported };
 

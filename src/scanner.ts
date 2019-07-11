@@ -1,6 +1,6 @@
-import * as debug from 'debug';
+import debug from 'debug';
 import * as _ from 'lodash';
-import * as Raven from 'raven';
+import * as Sentry from '@sentry/node';
 import { differenceInMinutes, subHours } from 'date-fns';
 
 import config from '../config';
@@ -11,11 +11,6 @@ import { getConnection } from './db';
 
 const log = debug('honbot');
 
-const sentry = Raven.config(config.dsn, {
-  autoBreadcrumbs: true,
-  captureUnhandledRejections: true,
-}).install();
-
 const STARTING_MATCH_ID = 149396730;
 const BATCH_SIZE = 25;
 let notExit = true;
@@ -25,6 +20,7 @@ async function findNewMatches() {
   if (diff > 25) {
     await sleep(1800000, 'made no forward progress');
   }
+
   if (newestMatchId) {
     const minutes = differenceInMinutes(new Date(), new Date(newestMatchDate));
     const hours = Math.round(minutes / 60);
@@ -37,14 +33,15 @@ async function findNewMatches() {
       }
     }
   }
+
   const newest = newestMatchId ? newestMatchId : STARTING_MATCH_ID;
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   const matchIds = _.range(newest + 1, newest + BATCH_SIZE).map(String);
   log('Finding new matches!');
   await grabAndSave(matchIds, true);
   await sleep(3000, 'findNewMatches sleep');
   if (notExit) {
     findNewMatches().catch(e => catchError(e));
-    return;
   }
 }
 
@@ -68,6 +65,7 @@ async function findAllMissing() {
       return;
     }
   }
+
   const missingIds = missing.map(x => x.id);
   log('Attempting old matches!');
   await grabAndSave(missingIds, false);
@@ -75,7 +73,6 @@ async function findAllMissing() {
   await sleep(10000, 'findAllMissing sleeping');
   if (notExit) {
     findAllMissing().catch(e => catchError(e));
-    return;
   }
 }
 
@@ -89,11 +86,12 @@ process.on('SIGINT', () => {
 
 function catchError(err: Error) {
   log(err);
-  sentry.captureException(err);
+  Sentry.captureException(err);
   process.exit(0);
 }
 
 if (!module.parent) {
+  Sentry.init({ dsn: config.dsn });
   findNewMatches().catch(e => catchError(e));
   findAllMissing().catch(e => catchError(e));
 }

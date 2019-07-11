@@ -16,8 +16,8 @@ export async function calculatePlayerSkill(players: Player[]) {
     .find({ account_id: In(accountIds) });
   // const found = current.map((n) => n.account_id);
   // const missing = _.difference(found, accountIds);
-  const teams = [[], []];
-  const teamIds = [[], []];
+  const teams: Rating[][] = [[], []];
+  const teamIds: number[][] = [[], []];
   const teamCreate: boolean[][] = [[], []];
   const teamWin = [0, 0];
   for (const p of players) {
@@ -31,17 +31,21 @@ export async function calculatePlayerSkill(players: Player[]) {
       create = true;
       r = new Rating();
     }
+
     if (p.team === 0) {
       continue;
     }
+
     teams[p.team - 1].push(r);
     teamCreate[p.team - 1].push(create);
     teamIds[p.team - 1].push(p.account_id);
-    teamWin[p.team - 1] += +p.win;
+    teamWin[p.team - 1] += Number(p.win);
   }
+
   if (!teams[0].length || !teams[1].length) {
     return;
   }
+
   const result: Rating[][] = ts.rate(teams, [
     Number(teamWin[0] < teamWin[1]),
     Number(teamWin[1] < teamWin[0]),
@@ -49,7 +53,7 @@ export async function calculatePlayerSkill(players: Player[]) {
   const flattenedResults = _.flatten(result);
   const flattendedTeamIds = _.flatten(teamIds);
   const flattendedTeamCreate = _.flatten(teamCreate);
-  const updates = flattendedTeamIds.map((value, key) => {
+  const updates = flattendedTeamIds.map(async (value, key) => {
     if (flattendedTeamCreate[key]) {
       const tsn = new Trueskill();
       tsn.account_id = value;
@@ -58,7 +62,8 @@ export async function calculatePlayerSkill(players: Player[]) {
       tsn.games = 1;
       return conn.getRepository(Trueskill).insert(tsn);
     }
-    const cur = res.find(x => x.account_id === value);
+
+    const cur = res.find(x => x.account_id === value) as Trueskill;
     cur.account_id = value;
     cur.mu = flattenedResults[key].mu;
     cur.sigma = flattenedResults[key].sigma;
@@ -74,15 +79,17 @@ export async function matchSkill(players: Player[]) {
   const pls = await conn
     .getRepository(Trueskill)
     .find({ account_id: In(accountIds) });
-  const teams = [[], []];
+  const teams: Rating[][] = [[], []];
   for (const p of players) {
-    const cur = pls.find(x => x.account_id === p.account_id);
+    const cur = pls.find(x => x.account_id === p.account_id) as unknown as TrueSkill;
     const r = new Rating(cur.mu, cur.sigma);
     teams[p.team - 1].push(r);
   }
+
   if (!teams[0].length || !teams[1].length) {
     return;
   }
+
   const quality = ts.quality(teams);
   const sum = _.sumBy(pls, 'mu');
   const averageScore = sum / pls.length;

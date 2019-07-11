@@ -1,9 +1,0 @@
-{
-  "extends": [
-    "tslint:latest",
-    "../tslint.json"
-  ],
-  "rules": {
-    "no-console": false
-  }
-}

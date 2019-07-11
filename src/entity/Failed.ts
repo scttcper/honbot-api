@@ -9,15 +9,15 @@ import {
 
 @Entity('fails')
 export class Failed {
-  @PrimaryColumn() id: number;
+  @PrimaryColumn() id!: number;
 
   @Index('fails_attempts')
   @Column()
-  attempts: number;
+  attempts!: number;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
+  createdAt!: Date;
 }

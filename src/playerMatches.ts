@@ -11,6 +11,7 @@ function addCompetitor(obj, nickname, win) {
   if (!obj[nickname]) {
     obj[nickname] = { t: 0, w: 0, l: 0, nickname };
   }
+
   obj[nickname][wl] += 1;
   obj[nickname].t += 1;
 }
@@ -35,25 +36,28 @@ export async function playerCompetition(lowercaseNickname: string) {
       against: [],
     };
   }
+
   const matches = await conn.getRepository(Match).find({ id: In(ids) });
   const w: any = {};
   const a: any = {};
   ids.forEach(m => {
     // other players in match
-    const p = _.find(matches, _.matchesProperty('id', m)).players;
+    const pf = _.find(matches, _.matchesProperty('id', m)) as Match;
+    const p = pf.players;
     // player itself
     const n = _.find(
       p,
       _.matchesProperty('lowercaseNickname', lowercaseNickname),
-    );
+    ) as Player;
     p.forEach(x => {
       if (x.lowercaseNickname === n.lowercaseNickname) {
         return;
       }
+
       addCompetitor(x.team === n.team ? w : a, x.nickname, n.win);
     });
   });
-  const res = { with: [], against: [] };
+  const res: { with: any[], against: any[] } = { with: [], against: [] };
   // removes players with less than 2 co-matches and sorts
   res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);

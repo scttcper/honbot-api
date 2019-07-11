@@ -8,12 +8,13 @@ import { Player } from '../src/entity/Player';
 import { parseMultimatch, findNewest } from '../src/matches';
 import { multimatch } from './data/multimatch';
 
-describe('honbot', function() {
-  before('should setup database', async function() {
+describe('honbot', () => {
+  before('should setup database', async () => {
     await flushdb();
   });
-  it('should load multimatch', async function() {
+  it('should load multimatch', async () => {
     const matchIds = multimatch[0].map(n => n.match_id);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [matches, players, failed] = await parseMultimatch(
       multimatch,
       matchIds,
@@ -38,7 +39,7 @@ describe('honbot', function() {
     await conn.getRepository(Failed).delete(pids);
 
     const startDay = startOfDay(new Date());
-    const limit = subDays('2012-01-01', 14);
+    const limit = subDays(new Date('2012-01-01'), 14);
     const yesterday = subDays(startDay, 1);
     await conn
       .createQueryBuilder()
@@ -49,7 +50,7 @@ describe('honbot', function() {
       .leftJoinAndSelect('match.players', 'players')
       .getMany();
   });
-  it('should find newest', async function() {
-    const [newestMatchId, newestMatchDate, diff] = await findNewest();
+  it('should find newest', async () => {
+    await findNewest();
   });
 });

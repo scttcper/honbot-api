@@ -14,9 +14,9 @@ export default async function stats(): Promise<Stats> {
   const matchRes = await conn
     .createEntityManager()
     .query(
-      `SELECT reltuples::bigint AS estimate FROM pg_class where relname='matches';`,
+      'SELECT reltuples::bigint AS estimate FROM pg_class where relname=\'matches\';',
     );
-  const matches: number = Number(matchRes[0].estimate);
+  const matches = Number(matchRes[0].estimate);
   const lastDayDate = subMinutes(subDays(new Date(), 1), 180);
   const loadedLastDay = await conn
     .createQueryBuilder()

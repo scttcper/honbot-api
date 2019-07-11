@@ -1,15 +1,15 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('trueskills')
 export class Trueskill {
-  @PrimaryColumn() account_id: number;
+  @PrimaryColumn() account_id!: number;
 
   @Column({ type: 'double precision', default: 25 })
-  mu: number;
+  mu!: number;
 
   @Column({ type: 'double precision', default: 25 / 3 })
-  sigma: number;
+  sigma!: number;
 
   @Column({ default: 1 })
-  games: number;
+  games!: number;
 }

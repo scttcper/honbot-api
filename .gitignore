@@ -39,3 +39,4 @@ jspm_packages
 config/config.dev.ts
 config/config.prod.ts
 build
+dist

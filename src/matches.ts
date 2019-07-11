@@ -1,4 +1,4 @@
-import * as debug from 'debug';
+import debug from 'debug';
 import * as _ from 'lodash';
 
 import { getConnection } from './db';
@@ -27,12 +27,14 @@ export async function findNewest(): Promise<any> {
   if (!match && !failed) {
     return [undefined, undefined, 0];
   }
+
   const m = match ? match.id : 0;
   const f = failed ? failed.id : 0;
   if (m > f) {
-    return [match.id, match.date, f - m];
+    return [match!.id, match!.date, f - m];
   }
-  return [failed.id, match.date, f - m];
+
+  return [failed!.id, match!.date, f - m];
 }
 
 function mapToNumber(obj: any) {
@@ -41,6 +43,7 @@ function mapToNumber(obj: any) {
     if (_.isNaN(b)) {
       return n;
     }
+
     return b;
   });
 }
@@ -59,7 +62,7 @@ export async function parseMultimatch(
       match_id: items.match_id,
       account_id: parseInt(items.account_id, 10),
     };
-    ITEM_SLOTS.map(slot => {
+    ITEM_SLOTS.forEach(slot => {
       if (items[slot]) {
         r.items.push(parseInt(items[slot], 10));
       }
@@ -68,11 +71,12 @@ export async function parseMultimatch(
   });
   raw[0] = raw[0].map((n: any) => {
     const x: any = {};
-    Object.keys(n).map((k: any) => {
+    Object.keys(n).forEach((k: any) => {
       if (k === 'match_id') {
         x[k] = n[k];
         return;
       }
+
       x[`setup_${k}`] = n[k];
     });
     return x;
@@ -96,6 +100,7 @@ export async function parseMultimatch(
       failed.push(parseInt(m, 10));
       continue;
     }
+
     const match = new Match();
     match.setup_no_repick = matchSetups[m][0].setup_no_repick;
     match.setup_no_agi = matchSetups[m][0].setup_no_agi;
@@ -204,9 +209,9 @@ export async function parseMultimatch(
       pl.gold = parseInt(n.gold, 10);
       pl.exp = parseInt(n.exp, 10);
       pl.kdr =
-        !pl.deaths || !pl.kills
-          ? pl.kills
-          : _.round(pl.kills / pl.deaths, 3) || 0;
+        !pl.deaths || !pl.kills ?
+          pl.kills :
+          _.round(pl.kills / pl.deaths, 3) || 0;
       pl.gpm = _.round(pl.gold / minutes, 3) || 0;
       pl.xpm = _.round(pl.exp / minutes, 3) || 0;
       pl.apm = _.round(pl.actions / minutes, 3) || 0;
@@ -219,8 +224,10 @@ export async function parseMultimatch(
         heroPick(mplayers, match.date),
       ]);
     }
+
     matches.push(match);
   }
+
   return [matches, players, failed];
 }
 
@@ -230,6 +237,7 @@ export async function grabAndSave(matchIds: any[], catchFail: boolean = true) {
     await sleep(100000, 'no results from grab');
     return;
   }
+
   const [matches, players, failed] = await parseMultimatch(res, matchIds);
   // if (failed.length === matchIds.length && catchFail) {
   //   log('25 failed, escaping');
@@ -255,12 +263,14 @@ export async function grabAndSave(matchIds: any[], catchFail: boolean = true) {
       .execute();
     await conn.getRepository(Failed).delete(pids);
   }
+
   if (failed.length) {
     const promises = failed.map(async f => {
       const fail = await conn.getRepository(Failed).findOne({ id: f });
       if (fail) {
         return conn.getRepository(Failed).increment(fail, 'attempts', 1);
       }
+
       const newFail = new Failed();
       newFail.id = f;
       return conn.getRepository(Failed).insert(newFail);
