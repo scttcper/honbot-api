@@ -8,7 +8,10 @@ const options = {
   headers: {
     'Client-ID': config.twitch,
   },
-  qs: { game: 'Heroes of Newerth' },
+  qs: {
+    game_id: 24664,
+    first: 4,
+  },
   json: true,
 };
 
@@ -25,7 +28,6 @@ export default async function getTwitchStreams() {
     return [];
   }
 
-  const sliced = res.streams.slice(0, 4);
-  client.setex('twitch:cache', 1000, JSON.stringify(sliced));
-  return sliced;
+  client.setex('twitch:cache', 1000, JSON.stringify(res.data));
+  return res.data;
 }
