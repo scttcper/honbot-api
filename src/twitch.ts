@@ -4,8 +4,10 @@ import config from '../config';
 import { client, getCache } from './redis';
 
 const options = {
-  url: 'https://api.twitch.tv/kraken/streams',
-  headers: { 'Client-ID': config.twitch },
+  url: 'https://api.twitch.tv/helix/streams',
+  headers: {
+    'Client-ID': config.twitch,
+  },
   qs: { game: 'Heroes of Newerth' },
   json: true,
 };

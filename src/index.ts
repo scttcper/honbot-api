@@ -46,6 +46,7 @@ server.route(serverRoutes);
 
 if (!module.parent) {
   register
+    // eslint-disable-next-line @typescript-eslint/require-await
     .then(async () => server.start())
     .then()
     .then(_ => {

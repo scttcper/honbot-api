@@ -57,7 +57,7 @@ export async function playerCompetition(lowercaseNickname: string) {
       addCompetitor(x.team === n.team ? w : a, x.nickname, n.win);
     });
   });
-  const res: { with: any[], against: any[] } = { with: [], against: [] };
+  const res: { with: any[]; against: any[] } = { with: [], against: [] };
   // removes players with less than 2 co-matches and sorts
   res.with = _.filter(w, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
   res.against = _.filter(a, (z: any) => z.t > 2).sort((c, d) => d.t - c.t);
