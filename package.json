@@ -35,7 +35,7 @@
     "request-promise-native": "1.0.7",
     "semver": "6.3.0",
     "ts-trueskill": "2.5.1",
-    "typeorm": "0.2.18"
+    "typeorm": "0.2.20"
   },
   "devDependencies": {
     "@types/boom": "7.3.0",

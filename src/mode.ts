@@ -30,6 +30,10 @@ export function getMode(match: any): string {
     }
 
     // seasons
+    if (semver.satisfies(version, '>=4.8.0')) {
+      return 'Season 12';
+    }
+
     if (semver.satisfies(version, '>=4.5.0')) {
       return 'Season 7';
     }

@@ -1,11 +1,11 @@
 import { subDays, subYears } from 'date-fns';
 import { chunk } from 'lodash';
-import { In } from 'typeorm';
 
 import { getConnection } from '../src/db';
 import { Failed } from '../src/entity/Failed';
 import { Heropick } from '../src/entity/Heropick';
 import { Match } from '../src/entity/Match';
+import { Player } from '../src/entity/Player';
 
 async function loop() {
   const conn = await getConnection();
@@ -19,6 +19,14 @@ async function loop() {
   if (unrankedDeleted.length > 0) {
     const chunks = chunk(unrankedDeleted, 100);
     for (const ch of chunks) {
+      console.log(ch);
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -33,6 +41,13 @@ async function loop() {
   if (oldDevoMatches.length > 0) {
     const chunks = chunk(oldDevoMatches, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -47,6 +62,13 @@ async function loop() {
   if (oldRiftMatches.length > 0) {
     const chunks = chunk(oldRiftMatches, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -61,6 +83,13 @@ async function loop() {
   if (oldCaptureMatches.length > 0) {
     const chunks = chunk(oldCaptureMatches, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -75,6 +104,13 @@ async function loop() {
   if (oldRankedMatches.length > 0) {
     const chunks = chunk(oldRankedMatches, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -89,18 +125,32 @@ async function loop() {
   if (oldMidWarMatches.length > 0) {
     const chunks = chunk(oldMidWarMatches, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
 
   const removedSeason1 = await conn.createQueryBuilder()
     .select('match.id').from(Match, 'match')
-    .where('match.mode = :mode', { mode: 'Season 1' })
+    .where('match.mode = :mode', { mode: 'Season 2' })
     .getMany();
   console.log('removedSeason1', removedSeason1.length);
   if (removedSeason1.length > 0) {
     const chunks = chunk(removedSeason1, 100);
     for (const ch of chunks) {
+      const matches = ch.map(x => x.id);
+      await conn
+        .createQueryBuilder()
+        .delete()
+        .from(Player)
+        .where('"players"."matchId" IN (:...matches)', { matches })
+        .execute();
       await conn.getRepository(Match).remove(ch);
     }
   }
@@ -123,16 +173,11 @@ async function loop() {
   }
 
   const pickDeleted = await conn.createQueryBuilder()
-    .select('heropick.id').from(Heropick, 'heropick')
-    .where('heropick.date <= :old', { old })
-    .getMany();
-  console.log('Heropick', pickDeleted.length);
-  if (pickDeleted.length > 0) {
-    const chunks = chunk(pickDeleted, 100);
-    for (const ch of chunks) {
-      await conn.getRepository(Heropick).remove(ch);
-    }
-  }
+    .delete()
+    .from(Heropick)
+    .where('heropicks.date <= :old', { old })
+    .execute();
+  console.log('Heropick', pickDeleted);
 }
 
 loop()
