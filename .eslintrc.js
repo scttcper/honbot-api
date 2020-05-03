@@ -14,6 +14,8 @@ module.exports = {
     'new-cap': 0,
     '@typescript-eslint/camelcase': 0,
     '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/restrict-template-expressions': 0,
+    '@typescript-eslint/prefer-readonly-parameter-types': 0,
     'comma-dangle': ['error', 'always-multiline'],
   },
 };

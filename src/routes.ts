@@ -2,7 +2,7 @@
 import Boom from 'boom';
 import { Request, ResponseToolkit, ServerRoute } from '@hapi/hapi';
 import { assert } from 'hoek';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 import { getConnection } from './db';
 import { Match } from './entity/Match';
@@ -21,20 +21,20 @@ const playerMatchRoute: ServerRoute = {
   options: {
     cors: { origin: 'ignore' },
     validate: {
-      params: {
+      params: Joi.object({
         nickname: Joi.string()
           .min(1)
           .max(15)
           .lowercase(),
-      },
+      }),
     },
     response: {
-      schema: {
+      schema: Joi.object({
         wins: Joi.number(),
         losses: Joi.number(),
         matches: Joi.array(),
         account_id: Joi.number(),
-      },
+      }),
     },
   },
   handler: async (req: Request, _: ResponseToolkit) => {
@@ -53,18 +53,18 @@ const playerCompetitionRoute: ServerRoute = {
   options: {
     cors: { origin: 'ignore' },
     validate: {
-      params: {
+      params: Joi.object({
         nickname: Joi.string()
           .min(1)
           .max(15)
           .lowercase(),
-      },
+      }),
     },
     response: {
-      schema: {
+      schema: Joi.object({
         with: Joi.array(),
         against: Joi.array(),
-      },
+      }),
     },
   },
   handler: async (req: Request, h: ResponseToolkit) => {
@@ -94,12 +94,12 @@ const matchRoute: ServerRoute = {
   options: {
     cors: { origin: 'ignore' },
     validate: {
-      params: {
+      params: Joi.object({
         id: Joi.number()
           .min(147503112)
           .positive()
           .required(),
-      },
+      }),
     },
     // response: {
     //   schema: Joi.object(),
@@ -121,15 +121,15 @@ const matchSkillRoute: ServerRoute = {
   options: {
     cors: { origin: 'ignore' },
     validate: {
-      params: {
+      params: Joi.object({
         id: Joi.number()
           .min(147503112)
           .positive()
           .required(),
-      },
+      }),
     },
     response: {
-      schema: {
+      schema: Joi.object({
         quality: Joi.number(),
         averageScore: Joi.number(),
         oddsTeam1Win: Joi.number(),
@@ -141,7 +141,7 @@ const matchSkillRoute: ServerRoute = {
             games: Joi.number(),
           }),
         ),
-      },
+      }),
     },
   },
   handler: async (req: Request, _: ResponseToolkit) => {
@@ -163,19 +163,19 @@ const playerSkillRoute: ServerRoute = {
   options: {
     cors: { origin: 'ignore' },
     validate: {
-      params: {
+      params: Joi.object({
         id: Joi.number()
           .positive()
           .required(),
-      },
+      }),
     },
     response: {
-      schema: {
+      schema: Joi.object({
         account_id: Joi.number(),
         mu: Joi.number(),
         sigma: Joi.number(),
         games: Joi.number(),
-      },
+      }),
     },
   },
   handler: async (req: Request, _: ResponseToolkit) => {

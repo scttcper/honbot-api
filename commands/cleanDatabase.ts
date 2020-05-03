@@ -10,8 +10,10 @@ import { Player } from '../src/entity/Player';
 async function loop() {
   const conn = await getConnection();
   const old = subDays(new Date(), 30);
-  const unrankedDeleted = await conn.createQueryBuilder()
-    .select('match.id').from(Match, 'match')
+  const unrankedDeleted = await conn
+    .getRepository(Match)
+    .createQueryBuilder('match')
+    .select('match.id')
     .where('match.createdAt <= :old', { old })
     .andWhere('match.mode = :mode', { mode: 'Unknown' })
     .getMany();

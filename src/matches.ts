@@ -231,7 +231,7 @@ export async function parseMultimatch(
   return [matches, players, failed];
 }
 
-export async function grabAndSave(matchIds: any[], catchFail: boolean = true) {
+export async function grabAndSave(matchIds: any[], catchFail = true) {
   const res = await fetch(matchIds);
   if ((!res || !res.length) && catchFail) {
     await sleep(100000, 'no results from grab');

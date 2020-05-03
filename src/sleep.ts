@@ -5,7 +5,7 @@ const log = debug('honbot');
 
 export default async function sleep(
   duration: number,
-  reason: string = 'waiting',
+  reason = 'waiting',
 ) {
   return new Promise(resolve => {
     const time = formatDistance(
