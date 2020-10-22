@@ -52,9 +52,10 @@ export async function parseMultimatch(
   raw: any,
   attempted: string[],
 ): Promise<[Match[], Player[][], number[]]> {
-  raw[0] = raw[0].map((setup: any) => {
+  console.log({ raw });
+  raw[0] = raw[0]?.map((setup: any) => {
     return mapToNumber(setup);
-  });
+  }) ?? [];
   // put items in array, remove null items
   raw[1] = raw[1].map((items: any) => {
     const r: any = {
