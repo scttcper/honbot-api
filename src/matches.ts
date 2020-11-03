@@ -53,6 +53,8 @@ export async function parseMultimatch(
   attempted: string[],
 ): Promise<[Match[], Player[][], number[]]> {
   console.log({ raw });
+  const garbageRemoval = raw.split('<b>470</b><br />\n');
+  raw = JSON.parse(JSON.stringify(garbageRemoval[garbageRemoval.length - 1]));
   raw[0] = raw[0]?.map((setup: any) => {
     return mapToNumber(setup);
   }) ?? [];
